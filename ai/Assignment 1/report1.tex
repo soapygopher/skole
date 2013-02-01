@@ -1,0 +1,82 @@
+\documentclass[letterpaper, 12pt]{article}
+
+\usepackage[english]{custompack}
+\usepackage{fullpage}
+%\usepackage{hyperref}
+%\usepackage{abcproblem}
+\usepackage{listings}
+%\renewcommand{\thesubsection}{\alph{subsection}}
+
+%\allowdisplaybreaks
+\numberwithin{theorem}{section}
+
+% (fold)
+\lstset{ 
+	basicstyle=\ttfamily\footnotesize,
+	keywordstyle=\color{blue}, 
+	commentstyle=\color{gray}, 
+	stringstyle=\color{darkgreen}, 
+	emphstyle=\color{purple},
+	%identifierstyle=, %vanlige ting
+	numbers=left, 
+	numberstyle=\footnotesize\ttfamily\color{gray}, 
+	numbersep=1em,
+	stepnumber=1, 
+	%firstnumber=last, % dersom listingen deles i to, forsett der man slapp
+	firstnumber=1,
+	showspaces=false, 
+	showstringspaces=false,
+	captionpos=b,
+	%frame=single,
+	breakatwhitespace,
+	breaklines=true, 
+	tabsize=4,
+	% python-spesifikt: 
+	language=python,
+	morekeywords={None, True, False, with, as, yield, self}, 
+	emph={tuple, int, append, raw_input, upper, map, reduce, filter, len, str, open, hex, bin, format, range, xrange, title, strip, split, pop, join, min, max, sum, chr, set, list, sort, sorted, reversed, enumerate, ValueError, TypeError, IndexError, dict, zip, ord, any, all, count, Exception, __init__, __str__, __repr__, __class__, __name__, KeyboardInterrupt, hash, items, add, lower, upper, float}
+}
+% (end)
+
+\title{\textbf{Assignment 1}}
+\author{Håkon Mork \\ ESCE 526 Artificial Intelligence}
+\date{\today}
+
+\begin{document}
+\maketitle
+\noindent
+
+\section{}
+\subsection{Number of states visited}
+\begin{table}[h]
+	\centering
+	\small
+	\begin{tabular}{lcccc}
+		Cutoff & 3 & 4 & 5 & 6 \\
+		\midrule
+		Minmax & &&& \\
+		Alpha-beta pruning &&&&
+	\end{tabular}
+\end{table}
+
+
+\subsection{Does state generation order matter?}
+
+\subsection{Delaying defeat}
+
+\section{}
+\subsection{Choice of evaluation function}
+
+\subsection{Number of nodes visited}
+
+\subsection{Tradeoff between evaluation function and game tree depth}
+
+\subsection{Gameplay log}
+
+\section*{Implementation comments}
+
+\clearpage
+\section*{Appendix: Source code}
+\lstinputlisting{./ass1.py}
+
+\end{document}
