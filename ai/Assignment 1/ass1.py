@@ -10,6 +10,8 @@ logthegame = False # write a log file on exit
 useab = True # alphabeta or minmax
 fancy = False # simple or fancy heuristic
 
+# git change
+
 # we store the board as a matrix, i.e., a list of lists
 # initialstate = [
 # 	["O", None, None, None, None, None, "X"],
