@@ -8,8 +8,6 @@ logging.basicConfig(level=logging.CRITICAL)
 #withhuman = False # human vs. computer, or computer against itself
 fancy = False # simple or fancy heuristic
 
-statesvisited = 0
-
 # tuples of (dy, dx) for all directions
 directions = {
 	"N": (-1, 0),
@@ -52,8 +50,6 @@ def successors(board, player):
 	return succs
 
 def alphabeta(player, node, depth, alpha, beta):
-	global statesvisited
-	statesvisited += 1
 	succs = successors(node.board, player)
 	otherplayer = black if player is white else black
 	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
@@ -88,8 +84,6 @@ def alphabeta(player, node, depth, alpha, beta):
 		return beta
 
 def minmax(player, node, depth):
-	global statesvisited
-	statesvisited += 1
 	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
 	#otherplayer = white if player is black else black
 	minplayer = black # arbitrary
@@ -246,7 +240,6 @@ while winner(board) is None:
 		else: #let the computer play against itself
 			succs = successors(board, currentplayer)
 			# take the possible move now, pick something better later on if we can find it
-			firstlevelvisited = 0
 			bestmove = succs[0].command
 			bestutility = 0
 			if useab: #alphabeta
@@ -260,7 +253,6 @@ while winner(board) is None:
 					if u > bestutility:
 						bestutility = u
 						bestmove = succboard.command
-					firstlevelvisited += 1
 			else: #minmax
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
@@ -272,12 +264,10 @@ while winner(board) is None:
 						logging.critical("Utility improved: " + str(u) + " from " + succboard.command)
 						bestutility = u
 						bestmove = succboard.command
-					firstlevelvisited += 1
 			cmd = bestmove
 			print "The computer makes the move", cmd
 		
 		print "cutoff", cutoff, "states", statesvisited, "with", "alphabeta" if useab else "minmax"
-		raise Exception("Counting states visited")
 		board = move(cmd, board, currentplayer)
 		if logthegame:
 			log.append("%s plays %s." % (playername, cmd))
