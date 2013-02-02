@@ -6,7 +6,6 @@ import string, copy, time, logging, argparse, random
 logging.basicConfig(level=logging.CRITICAL)
 
 #withhuman = False # human vs. computer, or computer against itself
-logthegame = False # write a log file on exit
 fancy = False # simple or fancy heuristic
 
 statesvisited = 0
@@ -196,11 +195,13 @@ parser.add_argument("-c", "--cutoff", help="Cutoff depth")
 parser.add_argument("-i", "--input", help="Input game board")
 parser.add_argument("-u", "--human", help="Play with a human opponent")
 parser.add_argument("-a", "--alg", choices=["mm", "ab"], help="Minmax or alpha-beta algorithm")
+parser.add_argument("-l", "--log", help="Write a game log on exit")
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
 human = white if args.human else None
 useab = (args.alg == "ab")
+logthegame = args.log
 
 if args.input:
 	with open(args.input, "r") as inputfile:
@@ -229,11 +230,13 @@ while winner(board) is None:
 	playername = currentplayer.__class__.__name__
 	p = prettyprint(board)
 	print p
-	log.append(p)
 	print "\nMove #%s:" % movenumber
-	log.append("\nMove #%s:" % movenumber)
-	cmd = ""
 	print "It's %s's turn." % playername
+	if logthegame:
+		log.append(p)
+		log.append("\nMove #%s:" % movenumber)
+		log.append("It's %s's turn." % playername)
+	cmd = ""
 	try:
 		if currentplayer is human:
 			print "Possible moves:"
@@ -276,7 +279,8 @@ while winner(board) is None:
 		print "cutoff", cutoff, "states", statesvisited, "with", "alphabeta" if useab else "minmax"
 		raise Exception("Counting states visited")
 		board = move(cmd, board, currentplayer)
-		log.append("%s plays %s." % (playername, cmd))
+		if logthegame:
+			log.append("%s plays %s." % (playername, cmd))
 		currentplayer = white if currentplayer is black else black
 		playername = currentplayer.__class__.__name__
 		movenumber += 1
@@ -284,24 +288,27 @@ while winner(board) is None:
 	#	print "Illegal move."
 		#raise
 	except KeyboardInterrupt:
-		log.append("Game cancelled.")
+		if logthegame:
+			log.append("Game cancelled.")
 		logging.critical("Game cancelled.")
 		break
 
 # post-game cleanup
 print prettyprint(board)
-log.append(prettyprint(board))
 
 if winner(board):
 	s = "%s won the match" % winner(board).__class__.__name__
 	print s
-	log.append(s)
+	if logthegame:
+		log.append(s)
 else:
 	print "It's a draw"
-	log.append("It's a draw")
+	if logthegame:
+		log.append("It's a draw")
 
 if logthegame:
-	logname = time.strftime("/Users/hakon/Desktop/con4-%Hh%M-%S.log")
+	log.append(prettyprint(board))
+	logname = time.strftime("./connect4-%H-%M-%S.log")
 	with open(logname, "w+") as logfile:
 		logfile.write("\n".join(log))
 
