@@ -1,27 +1,24 @@
 #!/usr/bin/env python
 
-import string, copy, time, logging
+import string, copy, time, logging, argparse
 
 # debug < info < warning < error < critical?
 logging.basicConfig(level=logging.CRITICAL)
 
 withhuman = False # human vs. computer, or computer against itself
 logthegame = False # write a log file on exit
-useab = True # alphabeta or minmax
+useab = False # alphabeta or minmax
 fancy = False # simple or fancy heuristic
 
 statesvisited = 0
 
-# we store the board as a matrix, i.e., a list of lists
-# initialstate = [
-# 	["O", None, None, None, None, None, "X"],
-# 	["X", None, None, None, None, None, "O"],
-# 	["O", None, None, None, None, None, "X"],
-# 	["X", None, None, None, None, None, "O"],
-# 	["O", None, None, None, None, None, "X"],
-# 	["X", None, None, None, None, None, "O"],
-# 	["O", None, None, None, None, None, "X"]
-# ]
+# tuples of (dy, dx) for all directions
+directions = {
+	"N": (-1, 0),
+	"E": (0, 1),
+	"S": (1, 0),
+	"W": (0, -1)
+}
 
 class Node:
 	def __init__(self, board, player, command):
@@ -197,19 +194,36 @@ black = Black()
 human = white if withhuman else None
 computer = black
 currentplayer = white
-cutoff = 5
+cutoff = 4
 
-# tuples of (dy, dx) for all directions
-directions = {
-	"N": (-1, 0),
-	"E": (0, 1),
-	"S": (1, 0),
-	"W": (0, -1)
-}
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--cutoff", help="Cutoff depth")
+parser.add_argument("-i", "--input", help="Input game board")
+args = parser.parse_args()
 
-with open("./starta.txt", "r") as f:
-	initstatestr = f.read()
-board = parse(initstatestr)
+if args.cutoff:
+	cutoff = int(args.cutoff)
+else:
+	cutoff = 3
+
+if args.input:
+	with open(args.input, "r") as inputfile:
+		initstr = inputfile.read()
+	board = parse(initstr)
+else:
+	board = [
+		["O", None, None, None, None, None, "X"],
+		["X", None, None, None, None, None, "O"],
+		["O", None, None, None, None, None, "X"],
+		["X", None, None, None, None, None, "O"],
+		["O", None, None, None, None, None, "X"],
+		["X", None, None, None, None, None, "O"],
+		["O", None, None, None, None, None, "X"]
+	]
+
+# with open("./startb.txt", "r") as f:
+# 	initstatestr = f.read()
+# board = parse(initstatestr)
 
 #board = initialstate
 log = ["Initial state:"]
