@@ -138,9 +138,11 @@ def simpleheuristic(board, player):
 		return 0
 
 def fancyheuristic(board, player):
-	pass
+	def inarow(board, player):
+		pass
+	return 10 ** inarow(board, player)
 
-def parse(boardstring):
+def parseboard(boardstring):
 	# build a matrix from a string describing the board layout
 	boardstring = string.replace(boardstring, ",", "")
 	board, line = [], []
@@ -200,7 +202,7 @@ logthegame = args.log
 if args.input:
 	with open(args.input, "r") as inputfile:
 		initstr = inputfile.read()
-	board = parse(initstr)
+	board = parseboard(initstr)
 else:
 	board = [
 		["O", None, None, None, None, None, "X"],
@@ -246,8 +248,6 @@ while winner(board) is None:
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succboard in succs:
-					percentdone = int(firstlevelvisited / float(len(succs)) * 100)
-					print percentdone, "% done"
 					#init with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succboard, 0, float("-inf"), float("inf"))
 					if u > bestutility:
@@ -257,8 +257,6 @@ while winner(board) is None:
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succboard in succs:
-					percentdone = int(firstlevelvisited / float(len(succs)) * 100)
-					print percentdone, "% done"
 					u = minmax(currentplayer, succboard, 0)
 					if u > bestutility:
 						logging.critical("Utility improved: " + str(u) + " from " + succboard.command)
