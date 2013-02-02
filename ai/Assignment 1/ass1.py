@@ -103,30 +103,33 @@ def prettyprint(board):
 	b = "\n".join(",".join(map(str, row)) for row in board)
 	return b.replace("None", " ")
 
+def horizontal(board, n):
+	# check if any consecutive four entries in a row are X-es or O-s
+	for line in board:
+		for i, char in enumerate(line):
+			if line[i : i + n] == ["O"] * n:
+				return white
+			elif line[i : i + n] == ["X"] * n:
+				return black
+
+def vertical(board, n):
+	# equivalent to the horizontal winner in the transposed matrix
+	return horizontal(map(list, zip(*board)), n)
+
+def diagonal(board, n):
+	# all downward diagonals must start in the upper-left 4x4 submatrix
+	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
+	# somewhat inelegant, but it works
+	for i in range(n):
+		for j in range(n):
+			if all(board[i + k][j + k] == "O" for k in range(n)) or all(board[6 - i - k][j + k] == "O" for k in range(n)):
+				return white
+			elif all(board[i + k][j + k] == "X" for k in range(n)) or all(board[6 - i - k][j + k] == "X" for k in range(n)):
+				return black
+
 def winner(board):
 	# indicate the winner (if any) in the given board state
-	def horizontal(board):
-		# check if any consecutive four entries in a row are X-es or O-s
-		for line in board:
-			for i, char in enumerate(line):
-				if line[i : i + 4] == ["O"] * 4:
-					return white
-				elif line[i : i + 4] == ["X"] * 4:
-					return black
-	def vertical(board):
-		# equivalent to the horizontal winner in the transposed matrix
-		return horizontal(map(list, zip(*board)))
-	def diagonal(board):
-		# all downward diagonals must start in the upper-left 4x4 submatrix
-		# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
-		# somewhat inelegant, but it works
-		for i in range(4):
-			for j in range(4):
-				if all(board[i + k][j + k] == "O" for k in range(4)) or all(board[6 - i - k][j + k] == "O" for k in range(4)):
-					return white
-				elif all(board[i + k][j + k] == "X" for k in range(4)) or all(board[6 - i - k][j + k] == "X" for k in range(4)):
-					return black
-	return horizontal(board) or vertical(board) or diagonal(board)
+	return horizontal(board, 4) or vertical(board, 4) or diagonal(board, 4)
 
 def simpleheuristic(board, player):
 	otherplayer = white if player is black else black
