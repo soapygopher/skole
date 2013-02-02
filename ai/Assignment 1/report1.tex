@@ -56,7 +56,7 @@ Game A:
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
 		Minmax & 77,445 & 1,276,689 & & \\
-		$\alpha$-$\beta$ pruning & 4,129 & 48,203 && \\
+		$\alpha$-$\beta$ pruning & 4,129 & 48,203 & 694,652 & \\
 		\midrule
 		Improvement & $\times$18.76 & $\times$26.49
 	\end{tabular}
@@ -69,10 +69,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & & & & \\
-		$\alpha$-$\beta$ pruning & & & & \\
+		Minmax & 98,345 & 1,704,319 & & \\
+		$\alpha$-$\beta$ pruning & 6,421 & & & \\
 		\midrule
-		Improvement & & & &
+		Improvement & $\times$15.32 & & &
 	\end{tabular}
 \end{table}
 
@@ -83,10 +83,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & & & & \\
-		$\alpha$-$\beta$ pruning & & & & \\
+		Minmax & 69,954 & & & \\
+		$\alpha$-$\beta$ pruning & 3,763 & 51,098 & & \\
 		\midrule
-		Improvement & & & &
+		Improvement & $\times$18.59 & & &
 	\end{tabular}
 \end{table}
 
@@ -111,6 +111,18 @@ My evaluation function iterates through the successor states in the order they w
 \section{Appendix: Source code}
 \subsection{Implementation comments}
 I consider the successors of the current state to be on cutoff level 0, and pass a depth parameter to the alpha-beta and minmax algorithms. This depth parameter is incremented for each ply in the recursion tree until the given cutoff limit is hit, at which point the heuristic evaluation of that state is returned.
+
+\subsection{Usage}
+All arguments are optional:
+\begin{itemize}
+	\item \texttt{-i} or \texttt{--input}: Specify an input file to be used as the initial game state. A plain-text file following the notation used in the assignment is expected. Defaults to the example illustrated in the ``Introduction'' part of the assignment text.
+	\item \texttt{-u} or \texttt{--human}: Indicate that the computer should play against a human adversary, not just against itself. The user will be prompted for input when it is their turn to play.
+	\item \texttt{-c} or \texttt{--cutoff}: Specify a cutoff depth. Defaults to 3.
+	\item \texttt{-a} or \texttt{--alg}: Specify which of the minmax or alpha-beta pruning algorithms is to be used. May take values \texttt{mm} or \texttt{ab}.
+\end{itemize}
+Example:
+
+\texttt{python ass1.py --input file.txt --human --alg ab --cutoff 4}
 
 \subsection{Listing}
 \lstinputlisting{./ass1.py}
