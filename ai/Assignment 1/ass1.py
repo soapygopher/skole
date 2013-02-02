@@ -3,10 +3,10 @@
 import string, copy, time, logging, argparse, random
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.DEBUG)
 
 #withhuman = False # human vs. computer, or computer against itself
-fancy = False # simple or fancy heuristic
+fancy = True # simple or fancy heuristic
 
 # tuples of (dy, dx) for all directions
 directions = {
@@ -85,7 +85,6 @@ def alphabeta(player, node, depth, alpha, beta):
 
 def minmax(player, node, depth):
 	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
-	#otherplayer = white if player is black else black
 	minplayer = black # arbitrary
 	if depth == cutoff or not successors(node.board, player):
 		logging.debug("Bottom reached, return utility " + str(node.value))
@@ -104,7 +103,7 @@ def prettyprint(board):
 	return b.replace("None", " ")
 
 def horizontal(board, n):
-	# check if any consecutive four entries in a row are X-es or O-s
+	# check if any consecutive n entries in a row are X-es or O-s
 	for line in board:
 		for i, char in enumerate(line):
 			if line[i : i + n] == ["O"] * n:
@@ -142,7 +141,10 @@ def simpleheuristic(board, player):
 
 def fancyheuristic(board, player):
 	def inarow(board, player):
-		pass
+		for n in [4, 3, 2, 1]:
+			if horizontal(board, n) is player or vertical(board, n) is player or diagonal(board, n) is player:
+				return n
+		return 1
 	return 10 ** inarow(board, player)
 
 def parseboard(boardstring):
@@ -183,11 +185,6 @@ def move(command, board, player):
 	else:
 		raise ValueError#("The move " + command + " is not legal")
 
-white = White()
-black = Black()
-computer = black
-currentplayer = white
-#cutoff = 4
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--cutoff", help="Cutoff depth")
@@ -198,7 +195,6 @@ parser.add_argument("-l", "--log", help="Write a game log on exit")
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
-human = white if args.human else None
 useab = (args.alg == "ab")
 logthegame = args.log
 
@@ -217,11 +213,12 @@ else:
 		["O", None, None, None, None, None, "X"]
 	]
 
-# with open("./startb.txt", "r") as f:
-# 	initstatestr = f.read()
-# board = parse(initstatestr)
+white = White()
+black = Black()
+human = white if args.human else None
+computer = black
+currentplayer = white
 
-#board = initialstate
 log = ["Initial state:"]
 movenumber = 1
 
