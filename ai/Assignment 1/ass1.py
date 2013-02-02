@@ -5,9 +5,8 @@ import string, copy, time, logging, argparse
 # debug < info < warning < error < critical?
 logging.basicConfig(level=logging.CRITICAL)
 
-withhuman = False # human vs. computer, or computer against itself
+#withhuman = False # human vs. computer, or computer against itself
 logthegame = False # write a log file on exit
-useab = False # alphabeta or minmax
 fancy = False # simple or fancy heuristic
 
 statesvisited = 0
@@ -191,20 +190,20 @@ def move(command, board, player):
 
 white = White()
 black = Black()
-human = white if withhuman else None
 computer = black
 currentplayer = white
-cutoff = 4
+#cutoff = 4
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--cutoff", help="Cutoff depth")
 parser.add_argument("-i", "--input", help="Input game board")
+parser.add_argument("-u", "--human", help="Play with a human opponent")
+parser.add_argument("-a", "--alg", choices=["mm", "ab"], help="Minmax or alpha-beta algorithm")
 args = parser.parse_args()
 
-if args.cutoff:
-	cutoff = int(args.cutoff)
-else:
-	cutoff = 3
+cutoff = int(args.cutoff) if args.cutoff else 3
+human = white if args.human else None
+useab = (args.alg == "ab")
 
 if args.input:
 	with open(args.input, "r") as inputfile:
