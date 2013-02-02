@@ -3,14 +3,12 @@
 import string, copy, time, logging
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 
-withhuman = True # human vs. computer, or computer against itself
+withhuman = False # human vs. computer, or computer against itself
 logthegame = False # write a log file on exit
 useab = True # alphabeta or minmax
 fancy = False # simple or fancy heuristic
-
-# git change
 
 # we store the board as a matrix, i.e., a list of lists
 # initialstate = [
@@ -61,12 +59,12 @@ def successors(board, player):
 
 def alphabeta(player, node, depth, alpha, beta):
 	succs = successors(node.board, player)
+	otherplayer = black if player is white else black
 	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
 	logging.info(str(hash(node)) + " looks like\n" + prettyprint(node.board))
 	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
 	logging.debug("They are (" + player.__class__.__name__ + "): ")
 	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
-	otherplayer = black if player is white else black
 	if depth == cutoff or len(succs) == 0:
 		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
 		if node.value > 0:
@@ -92,30 +90,6 @@ def alphabeta(player, node, depth, alpha, beta):
 				return alpha
 		logging.info("No pruning: returning beta = " + str(beta) + " from " + str(hash(node)))
 		return beta
-# 	else:
-# 		logging.info("Recursive alphabeta by %s" % player.__class__.__name__)
-# 		for childcmd, childnode in succs.items():
-# 			logging.info("Entering examination of child " + str(hash(childnode)) + " by " + childcmd + " from " + str(hash(node)))
-# 			#logging.info(str(hash(childnode)) + " looks like\n" + prettyprint(childnode.board))
-# 			if player is white: #maxplayer
-# 				alpha = max(alpha, alphabeta(otherplayer, childnode, depth + 1, alpha, beta))
-# 				if alpha >= beta:
-# 					logging.info("Pruning: returning beta = " + str(beta) + " from " + str(hash(childnode)))
-# 					return beta
-# 					#break
-# 				logging.info("No pruning: returning alpha = " + str(alpha) + " from " + str(hash(childnode)))
-# 				return alpha
-# 			else: #minplayer
-# 				beta = min(beta, alphabeta(otherplayer, childnode, depth + 1, alpha, beta))
-# 				if alpha >= beta:
-# 					logging.info("Pruning: returning alpha = " + str(alpha) + " from " + str(hash(childnode)))
-# 					return alpha
-# 					#break
-# 				logging.info("No pruning: returning beta = " + str(beta) + " from " + str(hash(childnode)))
-# 				return beta
-	#elif player is black: #maxplayer (arbitrary)
-
-
 
 def minmax(player, node, depth):
 	logging.debug("Inside minmax on node " + str(hash(node)))
@@ -252,8 +226,9 @@ while winner(board) is None:
 			cmd = raw_input()
 		else: #let the computer play against itself
 			succs = successors(board, currentplayer)
+			# take the possible move now, pick something better later on if we can find it
+			bestmove = succs[0].command
 			bestutility = 0
-			bestmove = None
 			if useab: #alphabeta
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
@@ -269,6 +244,7 @@ while winner(board) is None:
 				for succboard in succs:
 					u = minmax(currentplayer, succboard, 0)
 					if u > bestutility:
+						logging.critical("Utility improved: " + str(u) + " from " + succboard.command)
 						bestutility = u
 						bestmove = succboard.command
 			cmd = bestmove
