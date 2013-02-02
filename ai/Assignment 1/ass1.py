@@ -3,7 +3,7 @@
 import string, copy, time, logging, argparse, random
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 #withhuman = False # human vs. computer, or computer against itself
 fancy = True # simple or fancy heuristic
@@ -59,8 +59,6 @@ def alphabeta(player, node, depth, alpha, beta):
 	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
 	if depth == cutoff or len(succs) == 0:
 		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
-		if node.value > 0:
-			logging.info("Win found:\n" + prettyprint(node.board))
 		return node.value
 	elif player is white: #maxplayer, arbitrary
 		logging.debug("State is \n" + prettyprint(node.board))
@@ -140,12 +138,13 @@ def simpleheuristic(board, player):
 		return 0
 
 def fancyheuristic(board, player):
+	otherplayer = white if player is black else white
 	def inarow(board, player):
-		for n in [4, 3, 2, 1]:
+		for n in [4, 3, 2]:
 			if horizontal(board, n) is player or vertical(board, n) is player or diagonal(board, n) is player:
 				return n
 		return 1
-	return 10 ** inarow(board, player)
+	return 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
 
 def parseboard(boardstring):
 	# build a matrix from a string describing the board layout
@@ -265,7 +264,6 @@ while winner(board) is None:
 			cmd = bestmove
 			print "The computer makes the move", cmd
 		
-		print "cutoff", cutoff, "states", statesvisited, "with", "alphabeta" if useab else "minmax"
 		board = move(cmd, board, currentplayer)
 		if logthegame:
 			log.append("%s plays %s." % (playername, cmd))
