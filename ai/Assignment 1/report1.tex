@@ -48,19 +48,51 @@
 
 \section{}
 \subsection{Number of states visited}
+Game A:
 \begin{table}[h]
 	\centering
 	\small
-	\begin{tabular}{lcccc}
-		Cutoff & 3 & 4 & 5 & 6 \\
+	\begin{tabular}{lrrrr}
+		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & &&& \\
-		Alpha-beta pruning &&&&
+		Minmax & 77,445 & 1,276,689 & & \\
+		$\alpha$-$\beta$ pruning & 4,129 & 48,203 && \\
+		\midrule
+		Improvement & $\times$18.76 & $\times$26.49
+	\end{tabular}
+\end{table}
+
+\noindent Game B:
+\begin{table}[h]
+	\centering
+	\small
+	\begin{tabular}{lrrrr}
+		Cutoff depth & 3 & 4 & 5 & 6 \\
+		\midrule
+		Minmax & & & & \\
+		$\alpha$-$\beta$ pruning & & & & \\
+		\midrule
+		Improvement & & & &
+	\end{tabular}
+\end{table}
+
+\noindent Game C:
+\begin{table}[h]
+	\centering
+	\small
+	\begin{tabular}{lrrrr}
+		Cutoff depth & 3 & 4 & 5 & 6 \\
+		\midrule
+		Minmax & & & & \\
+		$\alpha$-$\beta$ pruning & & & & \\
+		\midrule
+		Improvement & & & &
 	\end{tabular}
 \end{table}
 
 
 \subsection{Does state generation order matter?}
+My evaluation function iterates through the successor states in the order they were generated: left-to-right, top-to-bottom, with the directions generated in the (arbitrary) order north-east-south-west. I shuffled\footnote{I used the Python standard library's \texttt{random.shuffle} function, which shuffles a sequence (e.g., our list of successor states) in place.} the list of possible successors before evaluating their subtrees, which should indicate whether there were any serious discrepancies in the number of states visited. 
 
 \subsection{Delaying defeat}
 
@@ -71,12 +103,16 @@
 
 \subsection{Tradeoff between evaluation function and game tree depth}
 
-\subsection{Gameplay log}
+%\subsection{Gameplay log}
 
-\section*{Implementation comments}
 
 \clearpage
-\section*{Appendix: Source code}
+\appendix
+\section{Appendix: Source code}
+\subsection{Implementation comments}
+I consider the successors of the current state to be on cutoff level 0, and pass a depth parameter to the alpha-beta and minmax algorithms. This depth parameter is incremented for each ply in the recursion tree until the given cutoff limit is hit, at which point the heuristic evaluation of that state is returned.
+
+\subsection{Listing}
 \lstinputlisting{./ass1.py}
 
 \end{document}
