@@ -246,26 +246,33 @@ while winner(board) is None:
 		else: #let the computer play against itself
 			succs = successors(board, currentplayer)
 			# take the possible move now, pick something better later on if we can find it
+			firstlevelvisited = 0
 			bestmove = succs[0].command
 			bestutility = 0
 			if useab: #alphabeta
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succboard in succs:
+					percentdone = int(firstlevelvisited / float(len(succs)))
+					print percentdone, "% done"
 					#init with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succboard, 0, float("-inf"), float("inf"))
 					if u > bestutility:
 						bestutility = u
 						bestmove = succboard.command
+					firstlevelvisited += 1
 			else: #minmax
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succboard in succs:
+					percentdone = int(firstlevelvisited / float(len(succs)))
+					print percentdone, "% done"
 					u = minmax(currentplayer, succboard, 0)
 					if u > bestutility:
 						logging.critical("Utility improved: " + str(u) + " from " + succboard.command)
 						bestutility = u
 						bestmove = succboard.command
+					firstlevelvisited += 1
 			cmd = bestmove
 			print "The computer makes the move", cmd
 		
