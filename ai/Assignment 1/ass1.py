@@ -3,12 +3,14 @@
 import string, copy, time, logging
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.CRITICAL)
 
 withhuman = False # human vs. computer, or computer against itself
 logthegame = False # write a log file on exit
 useab = True # alphabeta or minmax
 fancy = False # simple or fancy heuristic
+
+statesvisited = 0
 
 # we store the board as a matrix, i.e., a list of lists
 # initialstate = [
@@ -58,6 +60,8 @@ def successors(board, player):
 	return succs
 
 def alphabeta(player, node, depth, alpha, beta):
+	global statesvisited
+	statesvisited += 1
 	succs = successors(node.board, player)
 	otherplayer = black if player is white else black
 	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
@@ -92,7 +96,9 @@ def alphabeta(player, node, depth, alpha, beta):
 		return beta
 
 def minmax(player, node, depth):
-	logging.debug("Inside minmax on node " + str(hash(node)))
+	global statesvisited
+	statesvisited += 1
+	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
 	#otherplayer = white if player is black else black
 	minplayer = black # arbitrary
 	if depth == cutoff or not successors(node.board, player):
@@ -102,10 +108,10 @@ def minmax(player, node, depth):
 		return node.value
 	elif node.player is minplayer:
 		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
-		return min(minmax(player, child, depth + 1) for child in successors(node.board, player).values())
+		return min(minmax(player, child, depth + 1) for child in successors(node.board, player))
 	else:
 		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
-		return max(minmax(player, child, depth + 1) for child in successors(node.board, player).values())
+		return max(minmax(player, child, depth + 1) for child in successors(node.board, player))
 
 def prettyprint(board):
 	b = "\n".join(",".join(map(str, row)) for row in board)
@@ -191,7 +197,7 @@ black = Black()
 human = white if withhuman else None
 computer = black
 currentplayer = white
-cutoff = 3
+cutoff = 5
 
 # tuples of (dy, dx) for all directions
 directions = {
@@ -250,6 +256,8 @@ while winner(board) is None:
 			cmd = bestmove
 			print "The computer makes the move", cmd
 		
+		print "cutoff", cutoff, "states", statesvisited, "with", "alphabeta" if useab else "minmax"
+		raise Exception("Counting states visited")
 		board = move(cmd, board, currentplayer)
 		log.append("%s plays %s." % (playername, cmd))
 		currentplayer = white if currentplayer is black else black
