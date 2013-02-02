@@ -3,10 +3,10 @@
 import string, copy, time, logging, argparse, random
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.CRITICAL)
 
 #withhuman = False # human vs. computer, or computer against itself
-fancy = True # simple or fancy heuristic
+#fancy = False # simple or fancy heuristic
 
 # tuples of (dy, dx) for all directions
 directions = {
@@ -15,6 +15,9 @@ directions = {
 	"S": (1, 0),
 	"W": (0, -1)
 }
+
+# used for counting states, problem 1.1
+statesvisited = 0
 
 class Node:
 	def __init__(self, board, player, command):
@@ -47,9 +50,14 @@ def successors(board, player):
 						# IndexError: try to move outside of the board
 						continue
 	logging.debug("There were " + str(len(succs)) + " successors")
+	if args.shuffle:
+		random.shuffle(succs)
 	return succs
 
 def alphabeta(player, node, depth, alpha, beta):
+	if countingstates:
+		global statesvisited
+		statesvisited += 1
 	succs = successors(node.board, player)
 	otherplayer = black if player is white else black
 	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
@@ -82,6 +90,9 @@ def alphabeta(player, node, depth, alpha, beta):
 		return beta
 
 def minmax(player, node, depth):
+	if countingstates:
+		global statesvisited
+		statesvisited += 1
 	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
 	minplayer = black # arbitrary
 	if depth == cutoff or not successors(node.board, player):
@@ -144,7 +155,8 @@ def fancyheuristic(board, player):
 			if horizontal(board, n) is player or vertical(board, n) is player or diagonal(board, n) is player:
 				return n
 		return 1
-	return 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
+	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
+	return score
 
 def parseboard(boardstring):
 	# build a matrix from a string describing the board layout
@@ -188,14 +200,19 @@ def move(command, board, player):
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--cutoff", help="Cutoff depth")
 parser.add_argument("-i", "--input", help="Input game board")
-parser.add_argument("-u", "--human", help="Play with a human opponent")
+parser.add_argument("-u", "--human", help="Play with a human opponent", action="store_true")
 parser.add_argument("-a", "--alg", choices=["mm", "ab"], help="Minmax or alpha-beta algorithm")
-parser.add_argument("-l", "--log", help="Write a game log on exit")
+parser.add_argument("-l", "--log", help="Write a game log on exit", action="store_true")
+parser.add_argument("-s", "--shuffle", help="Shuffle successor list", action="store_true")
+parser.add_argument("-k", "--count", help="Count states visited", action="store_true")
+parser.add_argument("-f", "--fancy", help="Fancy heuristic function", action="store_true")
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
-useab = (args.alg == "ab")
+useab = not (args.alg == "mm")
 logthegame = args.log
+countingstates = args.count
+fancy = args.fancy
 
 if args.input:
 	with open(args.input, "r") as inputfile:
@@ -221,6 +238,8 @@ currentplayer = white
 log = ["Initial state:"]
 movenumber = 1
 
+t = time.time()
+
 while winner(board) is None:
 	playername = currentplayer.__class__.__name__
 	p = prettyprint(board)
@@ -240,7 +259,7 @@ while winner(board) is None:
 			cmd = raw_input()
 		else: #let the computer play against itself
 			succs = successors(board, currentplayer)
-			# take the possible move now, pick something better later on if we can find it
+			# take the first move, pick something better later on if we can find it
 			bestmove = succs[0].command
 			bestutility = 0
 			if useab: #alphabeta
@@ -265,8 +284,14 @@ while winner(board) is None:
 			print "The computer makes the move", cmd
 		
 		board = move(cmd, board, currentplayer)
+		
+		if countingstates:
+			print statesvisited
+			print time.time() - t
+			raise Exception("Counting states, stopping here")
 		if logthegame:
 			log.append("%s plays %s." % (playername, cmd))
+		
 		currentplayer = white if currentplayer is black else black
 		playername = currentplayer.__class__.__name__
 		movenumber += 1
