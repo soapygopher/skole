@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import string, copy, time, logging, argparse, random
+import string, copy, time, logging, argparse
 
 # debug < info < warning < error < critical?
 logging.basicConfig(level=logging.CRITICAL)
@@ -42,12 +42,15 @@ def successors(board, player):
 			if char == player.piece:
 				# try all possible moves: xyN, xyE, xyS, xyW
 				for cmd in (str(x + 1) + str(y + 1) + d for d in directions): 
+					#print player.__class__.__name__, cmd,
 					try:
 						candidate = move(cmd, board, player)
 						succs.append(Node(candidate, player, cmd))
+						#print "works ->", len(succs)
 					except (ValueError, IndexError) as e:
 						# ValueError: attempted move was illegal, e.g. trying to move to an occupied square
 						# IndexError: try to move outside of the board
+						#print "".join(e)
 						continue
 	logging.debug("There were " + str(len(succs)) + " successors")
 	return succs
@@ -250,8 +253,8 @@ while winner(board) is None:
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succboard in succs:
-					percentdone = int(firstlevelvisited / float(len(succs)) * 100)
-					print percentdone, "% done"
+					percentdone = int(firstlevelvisited / float(len(succs)))
+					print percentdone, "%% done"
 					#init with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succboard, 0, float("-inf"), float("inf"))
 					if u > bestutility:
@@ -262,7 +265,7 @@ while winner(board) is None:
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succboard in succs:
-					percentdone = int(firstlevelvisited / float(len(succs)) * 100)
+					percentdone = int(firstlevelvisited / float(len(succs)))
 					print percentdone, "% done"
 					u = minmax(currentplayer, succboard, 0)
 					if u > bestutility:

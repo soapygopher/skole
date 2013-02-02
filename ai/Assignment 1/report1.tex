@@ -55,10 +55,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 77,445 & 1,276,689 & & \\
-		$\alpha$-$\beta$ pruning & 4,129 & 48,203 & 694,652 & \\
+		Minmax & 77,445 & 1,276,689 & underway:8 & underway:10 \\
+		$\alpha$-$\beta$ pruning & 4129 & 48,203 & 694,652 & underway:9 \\
 		\midrule
-		Improvement & $\times$18.76 & $\times$26.49
+		Improvement & $\times$18.76 & $\times$26.49 & & ?
 	\end{tabular}
 \end{table}
 
@@ -69,10 +69,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 98,345 & 1,704,319 & & \\
-		$\alpha$-$\beta$ pruning & 6,421 & & & \\
+		Minmax & 98,345 & 1,704,319 & underway:12 & underway:14 \\
+		$\alpha$-$\beta$ pruning & 6421 & 96,884 & underway:15 & underway:7 \\
 		\midrule
-		Improvement & $\times$15.32 & & &
+		Improvement & $\times$15.32 & $\times$17.59 & & ?
 	\end{tabular}
 \end{table}
 
@@ -83,18 +83,19 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 69,954 & & & \\
-		$\alpha$-$\beta$ pruning & 3,763 & 51,098 & & \\
+		Minmax & 69,954 & 1,237,535 & underway:11 & underway:13 \\
+		$\alpha$-$\beta$ pruning & 3763 & 51,098 & 840,633 & underway:6 \\
 		\midrule
-		Improvement & $\times$18.59 & & &
+		Improvement & $\times$18.59 & $\times$24.22 & & ?
 	\end{tabular}
 \end{table}
 
 
 \subsection{Does state generation order matter?}
-My evaluation function iterates through the successor states in the order they were generated: left-to-right, top-to-bottom, with the directions generated in the (arbitrary) order north-east-south-west. I shuffled\footnote{I used the Python standard library's \texttt{random.shuffle} function, which shuffles a sequence (e.g., our list of successor states) in place.} the list of possible successors before evaluating their subtrees, which should indicate whether there were any serious discrepancies in the number of states visited. 
+My evaluation function iterates through the successor states in the order they were generated: left-to-right, top-to-bottom, with the directions generated in the (arbitrary) order north-east-south-west. I considered the first move in game A and ran alpha-beta pruning five times with a cutoff depth of 3, shuffling\footnote{I used the Python standard library's \texttt{random.shuffle} function, which shuffles a sequence (e.g., our list of successor states) in place using the Fisher--Yates algorithm.} the list of successor states randomly every time one is generated. The non-shuffled evaluation order visited 4129 states, as per the table above. 
 
-\subsection{Delaying defeat}
+I found that evaluation order \emph{did} matter, though not impressively so. The sample runs visited 4480, 4338, 4324, 4114, and 4376 states, respectively, for an average of 4326 states, which is $4.77\%$ more than the non-shuffled case. The maximum deviations were $8.5\%$ more and $0.36\%$ fewer states visited than the original order. I also tried evaluating states in the reverse order; the difference was negligble. This suggests that there is no significant benefit to be gained; we see that, in fact, most other evaluation orders visited more states than the original sequence. I don't know if this is a coincidence or if the order I picked is somehow optimal.
+
 
 \section{}
 \subsection{Choice of evaluation function}
@@ -103,14 +104,12 @@ My evaluation function iterates through the successor states in the order they w
 
 \subsection{Tradeoff between evaluation function and game tree depth}
 
-%\subsection{Gameplay log}
-
 
 \clearpage
 \appendix
 \section{Appendix: Source code}
-\subsection{Implementation comments}
-I consider the successors of the current state to be on cutoff level 0, and pass a depth parameter to the alpha-beta and minmax algorithms. This depth parameter is incremented for each ply in the recursion tree until the given cutoff limit is hit, at which point the heuristic evaluation of that state is returned.
+%\subsection{Implementation comments}
+%I consider the successors of the current state to be on cutoff level 0, and pass a depth parameter to the alpha-beta and minmax algorithms. This depth parameter is incremented for each ply in the recursion tree until the given cutoff limit is hit, at which point the heuristic evaluation of that state is returned.
 
 \subsection{Usage}
 All arguments are optional:
