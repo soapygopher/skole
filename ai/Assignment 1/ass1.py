@@ -117,19 +117,17 @@ def prettyprint(board):
 
 def horizontal(board, n, player):
 	# check if any consecutive n entries in a row are X-es or O-s
-	#w, b = 0, 0
+	# return the number of n-in-a-row instances on the board
 	piece = player.piece
-#	connected = 0
+	connected = 0
 	for line in board:
 		for i, char in enumerate(line):
 			if line[i : i + n] == [piece] * n:
-				return True
-	return False
-#				connected += 1
-#	return connected
+				connected += 1
+	return connected
 
 def vertical(board, n, player):
-	# equivalent to the horizontal winner in the transposed matrix
+	# equivalent to horizontal in the transposed matrix
 	return horizontal(map(list, zip(*board)), n, player)
 
 def diagonal(board, n, player):
@@ -137,18 +135,15 @@ def diagonal(board, n, player):
 	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
 	# somewhat inelegant, but it works
 	piece = player.piece
-#	connected = 0
+	connected = 0
 	for i in range(n):
 		for j in range(n):
 			if all(board[i + k][j + k] == piece for k in range(n)) or all(board[6 - i - k][j + k] == piece for k in range(n)):
-				return True
-	return False
-#				connected += 1
-#	return connected
+				connected += 1
+	return connected
 
 def winner(board):
 	# indicate the winner (if any) in the given board state
-#	if horizontal(board, 4, white) == 4 or vertical(board, 4, white) == 4 or diagonal(board, 4, white) == 4:
 	if horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white):
 		return white
 	elif horizontal(board, 4, black) or vertical(board, 4, black) or diagonal(board, 4, black):
@@ -156,7 +151,7 @@ def winner(board):
 	else:
 		return None
 
-def closeness(board, player):
+def moveblocks(board, player):
 	pass
 def simpleheuristic(board, player):
 	otherplayer = white if player is black else black
@@ -171,16 +166,10 @@ def fancyheuristic(board, player):
 	otherplayer = white if player is black else white
 	score = 0
 	for i in [4, 3, 2]:
-		n = 0
 		h = horizontal(board, i, player)
 		v = vertical(board, i, player)
 		d = diagonal(board, i, player)
-		# if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
-		# 	n -= 1
-		#score += (10 ** i) * n
 		score += (10 ** i) * (h + v + d)
-#	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
-	#if
 	return score
 
 def parseboard(boardstring):
@@ -213,19 +202,18 @@ def move(command, board, player):
 	# and is the destination square empty?
 	and not board[y + dy][x + dx]):
 		# then it's okay
-		# we don't want to update in place
 		successor = copy.deepcopy(board)
 		successor[y + dy][x + dx] = successor[y][x]
 		successor[y][x] = None
 		return successor
 	else:
-		raise ValueError#("The move " + command + " is not legal")
+		raise ValueError("The move " + command + " by " + player.__class__.__name__ + " is not legal")
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--cutoff", help="Cutoff depth")
 parser.add_argument("-i", "--input", help="Input game board")
-parser.add_argument("-u", "--human", help="Play with a human opponent", action="store_true")
+parser.add_argument("-u", "--human", choices=["w", "b"], help="Play with a human opponent")
 parser.add_argument("-a", "--alg", choices=["mm", "ab"], help="Minmax or alpha-beta algorithm")
 parser.add_argument("-l", "--log", help="Write a game log on exit", action="store_true")
 parser.add_argument("-s", "--shuffle", help="Shuffle successor list", action="store_true")
@@ -234,7 +222,7 @@ parser.add_argument("-f", "--fancy", help="Fancy heuristic function", action="st
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
-useab = not (args.alg == "mm")
+useab = not (args.alg == "mm") # alpha-beta by default
 logthegame = args.log
 countingstates = args.count
 fancy = args.fancy
@@ -256,14 +244,21 @@ else:
 
 white = White()
 black = Black()
-human = white if args.human else None
-computer = black
+
+if args.human == "w":
+	human = white
+	computer = black
+elif args.human == "b":
+	human = black
+	computer = white
+else:
+	human = None
+	computer = black # arbitrary
+
 currentplayer = white
 
 log = ["Initial state:"]
 movenumber = 1
-
-t = time.time()
 
 while winner(board) is None:
 	playername = currentplayer.__class__.__name__
@@ -282,21 +277,22 @@ while winner(board) is None:
 			for s in successors(board, currentplayer):
 				print s.command
 			cmd = raw_input()
-		else: #let the computer play against itself
+		else:
+			t = time.time() # time limit is 20 seconds
 			succs = successors(board, currentplayer)
 			# take the first move, pick something better later on if we can find it
 			bestmove = succs[0].command
 			bestutility = 0
-			if useab: #alphabeta
+			if useab: # alpha-beta pruning
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succboard in succs:
-					#init with alpha = -inf, beta = inf
+					# init with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succboard, 0, float("-inf"), float("inf"))
 					if u > bestutility:
 						bestutility = u
 						bestmove = succboard.command
-			else: #minmax
+			else: # minmax
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succboard in succs:
@@ -310,20 +306,17 @@ while winner(board) is None:
 			print "Thinking took", time.time() - t, "seconds"
 			if logging:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
-		
 		board = move(cmd, board, currentplayer)
-		
 		if countingstates:
 			print statesvisited
-			raise Exception("Counting states, stopping here")
+			raise Exception("Counting states only, stopping here")
 		if logthegame:
 			log.append("%s plays %s" % (playername, cmd))
-		
 		currentplayer = white if currentplayer is black else black
 		playername = currentplayer.__class__.__name__
 		movenumber += 1
-	#except ValueError:
-	#	print "Illegal move."
+	except ValueError:
+		print "Illegal move."
 		#raise
 	except KeyboardInterrupt:
 		if logthegame:
@@ -331,7 +324,7 @@ while winner(board) is None:
 		logging.critical("Game cancelled.")
 		break
 
-# post-game cleanup
+# post-game formalities
 print prettyprint(board)
 
 if winner(board):
