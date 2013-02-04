@@ -3,7 +3,7 @@
 import string, copy, time, logging, argparse, random
 
 # debug < info < warning < error < critical?
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.DEBUG)
 
 #withhuman = False # human vs. computer, or computer against itself
 #fancy = False # simple or fancy heuristic
@@ -65,9 +65,13 @@ def alphabeta(player, node, depth, alpha, beta):
 	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
 	logging.debug("They are (" + player.__class__.__name__ + "): ")
 	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
+	# cut off if we are too deep down
 	if depth == cutoff or len(succs) == 0:
 		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
 		return node.value
+	# return immediately if we win by making this move
+	elif winner(node.board) is player:
+		return float("inf")
 	elif player is white: #maxplayer, arbitrary
 		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
@@ -139,6 +143,8 @@ def winner(board):
 	# indicate the winner (if any) in the given board state
 	return horizontal(board, 4) or vertical(board, 4) or diagonal(board, 4)
 
+def closeness(board, player):
+	pass
 def simpleheuristic(board, player):
 	otherplayer = white if player is black else black
 	if winner(board) is player:
@@ -150,12 +156,16 @@ def simpleheuristic(board, player):
 
 def fancyheuristic(board, player):
 	otherplayer = white if player is black else white
-	def inarow(board, player):
-		for n in [4, 3, 2]:
-			if horizontal(board, n) is player or vertical(board, n) is player or diagonal(board, n) is player:
-				return n
-		return 1
-	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
+	score = 0
+	for i in [4, 3, 2]:
+		n = 0
+		if horizontal(board, i) is player or vertical(board, i) is player or diagonal(board, i) is player:
+			n += 1
+		if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
+			n -= 1
+		score += (10 ** i) * n
+#	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
+	#if
 	return score
 
 def parseboard(boardstring):
@@ -282,15 +292,17 @@ while winner(board) is None:
 						bestmove = succboard.command
 			cmd = bestmove
 			print "The computer makes the move", cmd
+			print "Thinking took", time.time() - t, "seconds"
+			if logging:
+				log.append("Thinking took " + str(time.time() - t) + " seconds")
 		
 		board = move(cmd, board, currentplayer)
 		
 		if countingstates:
 			print statesvisited
-			print time.time() - t
 			raise Exception("Counting states, stopping here")
 		if logthegame:
-			log.append("%s plays %s." % (playername, cmd))
+			log.append("%s plays %s" % (playername, cmd))
 		
 		currentplayer = white if currentplayer is black else black
 		playername = currentplayer.__class__.__name__
