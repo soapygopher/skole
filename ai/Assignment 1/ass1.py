@@ -65,14 +65,14 @@ def alphabeta(player, node, depth, alpha, beta):
 	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
 	logging.debug("They are (" + player.__class__.__name__ + "): ")
 	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
-	# cut off if we are too deep down
+	# cut off and return heuristic value if we are too deep down
 	if depth == cutoff or len(succs) == 0:
 		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
 		return node.value
 	# return immediately if we win by making this move
-	elif winner(node.board) is player:
-		return float("inf")
-	elif player is white: #maxplayer, arbitrary
+	# elif winner(node.board) is player:
+	# 	return float("inf")
+	elif player is white: # white is maxplayer (arbitrary pick)
 		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
 			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
@@ -82,7 +82,7 @@ def alphabeta(player, node, depth, alpha, beta):
 				return beta
 		logging.info("No pruning: returning alpha = " + str(alpha) + " from " + str(hash(node)))
 		return alpha
-	else: #black minplayer
+	else: # black is minplayer
 		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
 			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
@@ -151,9 +151,11 @@ def winner(board):
 	else:
 		return None
 
-def moveblocks(board, player):
+def sabotage(board, player):
 	pass
+
 def simpleheuristic(board, player):
+	# as given in problem 1
 	otherplayer = white if player is black else black
 	if winner(board) is player:
 		return 1
@@ -173,7 +175,8 @@ def fancyheuristic(board, player):
 	return score
 
 def parseboard(boardstring):
-	# build a matrix from a string describing the board layout
+	# in case we want to specify an initial board layout,
+	# build a matrix from the given string (notation as in assignment)
 	boardstring = string.replace(boardstring, ",", "")
 	board, line = [], []
 	for char in boardstring:
@@ -270,13 +273,13 @@ while winner(board) is None:
 		log.append(p)
 		log.append("\nMove #%s:" % movenumber)
 		log.append("It's %s's turn." % playername)
-	cmd = ""
+	cmd = "" # command string, e.g. 11E or 54N
 	try:
 		if currentplayer is human:
 			print "Possible moves:"
 			for s in successors(board, currentplayer):
 				print s.command
-			cmd = raw_input()
+			cmd = raw_input() 
 		else:
 			t = time.time() # time limit is 20 seconds
 			succs = successors(board, currentplayer)
@@ -306,7 +309,8 @@ while winner(board) is None:
 			print "Thinking took", time.time() - t, "seconds"
 			if logging:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
-		board = move(cmd, board, currentplayer)
+		# may raise a ValueError if input is ill-formed:
+		board = move(cmd, board, currentplayer) 
 		if countingstates:
 			print statesvisited
 			raise Exception("Counting states only, stopping here")
