@@ -119,12 +119,14 @@ def horizontal(board, n, player):
 	# check if any consecutive n entries in a row are X-es or O-s
 	#w, b = 0, 0
 	piece = player.piece
-	connected = 0
+#	connected = 0
 	for line in board:
 		for i, char in enumerate(line):
 			if line[i : i + n] == [piece] * n:
-				connected += 1
-	return connected
+				return True
+	return False
+#				connected += 1
+#	return connected
 
 def vertical(board, n, player):
 	# equivalent to the horizontal winner in the transposed matrix
@@ -135,18 +137,21 @@ def diagonal(board, n, player):
 	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
 	# somewhat inelegant, but it works
 	piece = player.piece
-	connected = 0
+#	connected = 0
 	for i in range(n):
 		for j in range(n):
 			if all(board[i + k][j + k] == piece for k in range(n)) or all(board[6 - i - k][j + k] == piece for k in range(n)):
-				connected += 1
-	return connected
+				return True
+	return False
+#				connected += 1
+#	return connected
 
 def winner(board):
 	# indicate the winner (if any) in the given board state
-	if horizontal(board, 4, white) == 4 or vertical(board, 4, white) == 4 or diagonal(board, 4, white) == 4:
+#	if horizontal(board, 4, white) == 4 or vertical(board, 4, white) == 4 or diagonal(board, 4, white) == 4:
+	if horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white):
 		return white
-	elif horizontal(board, 4, black) == 4 or vertical(board, 4, black) == 4 or diagonal(board, 4, black) == 4:
+	elif horizontal(board, 4, black) or vertical(board, 4, black) or diagonal(board, 4, black):
 		return black
 	else:
 		return None
@@ -167,11 +172,13 @@ def fancyheuristic(board, player):
 	score = 0
 	for i in [4, 3, 2]:
 		n = 0
-		if horizontal(board, i, player) == i or vertical(board, i, player) == i or diagonal(board, i, player) == i:
-			n += 1
+		h = horizontal(board, i, player)
+		v = vertical(board, i, player)
+		d = diagonal(board, i, player)
 		# if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
 		# 	n -= 1
-		score += (10 ** i) * n
+		#score += (10 ** i) * n
+		score += (10 ** i) * (h + v + d)
 #	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
 	#if
 	return score
