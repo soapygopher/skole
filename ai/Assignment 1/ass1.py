@@ -119,17 +119,12 @@ def horizontal(board, n, player):
 	# check if any consecutive n entries in a row are X-es or O-s
 	#w, b = 0, 0
 	piece = player.piece
+	connected = 0
 	for line in board:
 		for i, char in enumerate(line):
 			if line[i : i + n] == [piece] * n:
-				return player
-			# if line[i : i + n] == ["O"] * n:
-			# 	#w += 1
-			# 	return white
-			# elif line[i : i + n] == ["X"] * n:
-			# 	#b += 1
-			# 	return black
-				
+				connected += 1
+	return connected
 
 def vertical(board, n, player):
 	# equivalent to the horizontal winner in the transposed matrix
@@ -140,15 +135,21 @@ def diagonal(board, n, player):
 	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
 	# somewhat inelegant, but it works
 	piece = player.piece
+	connected = 0
 	for i in range(n):
 		for j in range(n):
 			if all(board[i + k][j + k] == piece for k in range(n)) or all(board[6 - i - k][j + k] == piece for k in range(n)):
-				return player
+				connected += 1
+	return connected
 
 def winner(board):
 	# indicate the winner (if any) in the given board state
-	return horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white) \
-	or horizontal(board, 4, black) or vertical(board, 4, black) or diagonal(board, 4, black)
+	if horizontal(board, 4, white) == 4 or vertical(board, 4, white) == 4 or diagonal(board, 4, white) == 4:
+		return white
+	elif horizontal(board, 4, black) == 4 or vertical(board, 4, black) == 4 or diagonal(board, 4, black) == 4:
+		return black
+	else:
+		return None
 
 def closeness(board, player):
 	pass
@@ -166,7 +167,7 @@ def fancyheuristic(board, player):
 	score = 0
 	for i in [4, 3, 2]:
 		n = 0
-		if horizontal(board, i, player) is player or vertical(board, i, player) is player or diagonal(board, i, player) is player:
+		if horizontal(board, i, player) == i or vertical(board, i, player) == i or diagonal(board, i, player) == i:
 			n += 1
 		# if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
 		# 	n -= 1
