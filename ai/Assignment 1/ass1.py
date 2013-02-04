@@ -115,33 +115,40 @@ def prettyprint(board):
 	b = "\n".join(",".join(map(str, row)) for row in board)
 	return b.replace("None", " ")
 
-def horizontal(board, n):
+def horizontal(board, n, player):
 	# check if any consecutive n entries in a row are X-es or O-s
+	#w, b = 0, 0
+	piece = player.piece
 	for line in board:
 		for i, char in enumerate(line):
-			if line[i : i + n] == ["O"] * n:
-				return white
-			elif line[i : i + n] == ["X"] * n:
-				return black
+			if line[i : i + n] == [piece] * n:
+				return player
+			# if line[i : i + n] == ["O"] * n:
+			# 	#w += 1
+			# 	return white
+			# elif line[i : i + n] == ["X"] * n:
+			# 	#b += 1
+			# 	return black
+				
 
-def vertical(board, n):
+def vertical(board, n, player):
 	# equivalent to the horizontal winner in the transposed matrix
-	return horizontal(map(list, zip(*board)), n)
+	return horizontal(map(list, zip(*board)), n, player)
 
-def diagonal(board, n):
+def diagonal(board, n, player):
 	# all downward diagonals must start in the upper-left 4x4 submatrix
 	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
 	# somewhat inelegant, but it works
+	piece = player.piece
 	for i in range(n):
 		for j in range(n):
-			if all(board[i + k][j + k] == "O" for k in range(n)) or all(board[6 - i - k][j + k] == "O" for k in range(n)):
-				return white
-			elif all(board[i + k][j + k] == "X" for k in range(n)) or all(board[6 - i - k][j + k] == "X" for k in range(n)):
-				return black
+			if all(board[i + k][j + k] == piece for k in range(n)) or all(board[6 - i - k][j + k] == piece for k in range(n)):
+				return player
 
 def winner(board):
 	# indicate the winner (if any) in the given board state
-	return horizontal(board, 4) or vertical(board, 4) or diagonal(board, 4)
+	return horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white) \
+	or horizontal(board, 4, black) or vertical(board, 4, black) or diagonal(board, 4, black)
 
 def closeness(board, player):
 	pass
@@ -159,10 +166,10 @@ def fancyheuristic(board, player):
 	score = 0
 	for i in [4, 3, 2]:
 		n = 0
-		if horizontal(board, i) is player or vertical(board, i) is player or diagonal(board, i) is player:
+		if horizontal(board, i, player) is player or vertical(board, i, player) is player or diagonal(board, i, player) is player:
 			n += 1
-		if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
-			n -= 1
+		# if horizontal(board, i) is otherplayer or vertical(board, i) is otherplayer or diagonal(board, i) is otherplayer:
+		# 	n -= 1
 		score += (10 ** i) * n
 #	score = 10 ** inarow(board, player) - 0.5 * 10 ** inarow(board, otherplayer)
 	#if
