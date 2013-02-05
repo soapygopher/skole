@@ -3,10 +3,7 @@
 # Usage: python ass1.py [args]
 # See submitted report for details.
 
-import string, copy, time, logging, argparse, random
-
-# debug < info < warning < error < critical?
-logging.basicConfig(level=logging.DEBUG)
+import string, copy, time, argparse, random
 
 # Tuples of (dy, dx) for all directions
 directions = {
@@ -38,7 +35,6 @@ class White:
 
 # Generates a list of all possible successor states to the given board position.
 def successors(board, player):
-	logging.debug("Generating successors for player = " + player.__class__.__name__ + ", board = " + str(board))
 	succs = []
 	for y, line in enumerate(board):
 		for x, char in enumerate(line):
@@ -52,7 +48,6 @@ def successors(board, player):
 						# ValueError: attempted move was illegal, e.g. trying to move to an occupied square
 						# IndexError: try to move outside of the board
 						continue
-	logging.debug("There were " + str(len(succs)) + " successors")
 	# Used for problem 1.2, for determining whether varying the evaluation order matters
 	if args.shuffle:
 		random.shuffle(succs)
@@ -64,55 +59,36 @@ def alphabeta(player, node, depth, alpha, beta):
 		statesvisited += 1
 	succs = successors(node.board, player)
 	otherplayer = white if player is black else black
-	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
-	logging.info(str(hash(node)) + " looks like\n" + prettyprint(node.board))
-	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
-	logging.debug("They are (" + player.__class__.__name__ + "): ")
-	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
 	# Cut off and return heuristic value if we are too deep down
 	if depth == cutoff or len(succs) == 0:
-		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
 		return node.value
 	# White is maxplayer (arbitrary pick)
 	elif player is white: 
-		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
-			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
 			alpha = max(alpha, alphabeta(otherplayer, childnode, depth + 1, alpha, beta))
 			if alpha >= beta:
-				logging.info("Pruning: returning beta = " + str(beta) + " from " + str(hash(childnode)))
 				return beta
-		logging.info("No pruning: returning alpha = " + str(alpha) + " from " + str(hash(node)))
 		return alpha
 	# Black is minplayer
 	else: 
-		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
-			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
 			beta = min(beta, alphabeta(otherplayer, childnode, depth + 1, alpha, beta))
 			if alpha >= beta:
-				logging.info("Pruning: returning alpha = " + str(alpha) + " from " + str(hash(childnode)))
 				return alpha
-		logging.info("No pruning: returning beta = " + str(beta) + " from " + str(hash(node)))
 		return beta
 
 def minmax(player, node, depth):
 	if countingstates:
 		global statesvisited
 		statesvisited += 1
-	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
 	if depth == cutoff or not successors(node.board, player):
-		logging.debug("Bottom reached, return utility " + str(node.value))
 		if node.value > 0:
-			logging.debug("Win found:\n" + prettyprint(node.board))
 		return node.value
 	# Black is minplayer (arbitrary pick)
 	elif node.player is black:
-		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
 		return min(minmax(player, child, depth + 1) for child in successors(node.board, player))
 	# White is maxplayer
 	else:
-		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
 		return max(minmax(player, child, depth + 1) for child in successors(node.board, player))
 
 # Returns a comma-separated board of X-es and O-s to be printed to console.
@@ -340,8 +316,6 @@ while winner(board) is None:
 			
 			# Pick algorithm according to --alg argument.
 			if useab: # Alpha-beta pruning
-				logging.warning("Player " + playername + " thinking about what to do.")
-				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succ in succs:
 					# Initialize with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succ, 0, float("-inf"), float("inf"))
@@ -352,12 +326,9 @@ while winner(board) is None:
 						print "Time limit cutoff"
 						break
 			else: # Minmax
-				logging.warning("Player " + playername + " thinking about what to do.")
-				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succ in succs:
 					u = minmax(currentplayer, succ, 0)
 					if u > bestutility:
-						logging.critical("Utility improved: " + str(u) + " from " + succ.command)
 						bestutility = u
 						bestmove = succ.command
 					if time.time() - t > timeout:
@@ -366,7 +337,6 @@ while winner(board) is None:
 			
 			cmd = bestmove
 			print "The computer makes the move", cmd
-			logging.info("Best utility was " + str(bestutility))
 			print "Thinking took", time.time() - t, "seconds"
 			if logging:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
@@ -392,7 +362,6 @@ while winner(board) is None:
 	except KeyboardInterrupt:
 		if logthegame:
 			log.append("Game cancelled.")
-		logging.critical("Game cancelled.")
 		break
 
 # Post-game formalities: print the board one last time, logging
