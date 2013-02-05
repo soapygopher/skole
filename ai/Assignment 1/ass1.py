@@ -78,18 +78,16 @@ def alphabeta(player, node, depth, alpha, beta):
 		return beta
 
 def minmax(player, node, depth):
+	otherplayer = white if player is black else black
 	if countingstates:
 		global statesvisited
 		statesvisited += 1
 	if depth == cutoff or not successors(node.board, player):
-		if node.value > 0:
 		return node.value
-	# Black is minplayer (arbitrary pick)
-	elif node.player is black:
-		return min(minmax(player, child, depth + 1) for child in successors(node.board, player))
-	# White is maxplayer
+	elif node.player is black: # Arbitrary pick
+		return min(minmax(otherplayer, child, depth + 1) for child in successors(node.board, player))
 	else:
-		return max(minmax(player, child, depth + 1) for child in successors(node.board, player))
+		return max(minmax(otherplayer, child, depth + 1) for child in successors(node.board, player))
 
 # Returns a comma-separated board of X-es and O-s to be printed to console.
 def prettyprint(board):
@@ -111,8 +109,7 @@ def horizontal(board, n, player):
 def vertical(board, n, player):
 	return horizontal(map(list, zip(*board)), n, player)
 
-# All downward diagonals must start in the upper-left 4x4 submatrix, and
-# similarly, all upward diagonals must start in the lower-left 4x4 submatrix.
+# All downward diagonals must start in the upper-left 4x4 submatrix, and similarly, all upward diagonals must start in the lower-left 4x4 submatrix.
 # Somewhat inelegant, but it works.
 def diagonal(board, n, player):
 	piece = player.piece
@@ -126,8 +123,7 @@ def diagonal(board, n, player):
 	return connected
 
 # Indicate the winner (if any) in the given board state.
-# Used, among other things, for the main game loop, which
-# runs as long as there is no winner.
+# Used, among other things, for the main game loop, which runs as long as there is no winner.
 def winner(board):
 	if horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white):
 		return white
@@ -136,8 +132,7 @@ def winner(board):
 	else:
 		return None
 
-# Indicated whether the player has managed to thwart the opponent's 
-# play by blocking three of their pieces, thus preventing a loss.
+# Indicated whether the player has managed to thwart the opponent's play by blocking three of their pieces, thus preventing a loss.
 # Used by the advanced utility function.
 def sabotage(board, player):
 	goal = "OOOX" if player is black else "XXXO"
@@ -149,11 +144,8 @@ def sabotage(board, player):
 	# then look up XXXO and OOOX and their reverses in that string.
 	hor = any(goal in line or goal[::-1] in line for line in auxboard)
 	vert = any(goal in line or goal[::-1] in line for line in auxtransp)
-	# The diagonal is a bit more tricky, but the same reasoning applies as 
-	# in the horizontal(board, n, player) function.
-	# All interesting diagonals start in the upper or lower left quandrants,
-	# so we make a list of them, join each of them up and look 
-	# for the OOOX and XXXO strings and their reverses there.
+	# The diagonal is a bit more tricky, but the same reasoning applies as in the horizontal(board, n, player) function.
+	# All interesting diagonals start in the upper or lower left quandrants, so we make a list of them, join each of them up and look for the OOOX and XXXO strings and their reverses there.
 	diags = []
 	for i in range(4):
 		for j in range(4):
@@ -174,8 +166,7 @@ def simpleheuristic(board, player):
 	else:
 		return 0
 
-# A somewhat more advanced heuristic, used for part 2 of the assignment
-# and actual gameplay. See the submitted report for details and discussion.
+# A somewhat more advanced heuristic, used for part 2 of the assignment and actual gameplay. See the submitted report for details and discussion.
 def fancyheuristic(board, player):
 	otherplayer = white if player is black else black
 	score = 0
@@ -267,8 +258,7 @@ else: # If not, default to the starting position from the assignment.
 white = White()
 black = Black()
 
-# Designate a human player to a color if one is given, 
-# else let the computer play against itself.
+# Designate a human player to a color if one is given, else let the computer play against itself.
 if args.human == "w":
 	human = white
 	computer = black
@@ -338,7 +328,7 @@ while winner(board) is None:
 			cmd = bestmove
 			print "The computer makes the move", cmd
 			print "Thinking took", time.time() - t, "seconds"
-			if logging:
+			if logthegame:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
 		
 		# May raise a ValueError if input is ill-formed.
