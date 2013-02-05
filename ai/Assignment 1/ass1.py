@@ -1,14 +1,14 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Usage: python ass1.py [args]
+# See submitted report for details.
 
 import string, copy, time, logging, argparse, random
 
 # debug < info < warning < error < critical?
 logging.basicConfig(level=logging.DEBUG)
 
-#withhuman = False # human vs. computer, or computer against itself
-#fancy = False # simple or fancy heuristic
-
-# tuples of (dy, dx) for all directions
+# Tuples of (dy, dx) for all directions
 directions = {
 	"N": (-1, 0),
 	"E": (0, 1),
@@ -16,16 +16,18 @@ directions = {
 	"W": (0, -1)
 }
 
-# used for counting states, problem 1.1
+# Used for counting states, problem 1.1
 statesvisited = 0
 
+# Used for the search algorithms.
 class Node:
 	def __init__(self, board, player, command):
 		self.board = board
 		self.player = player
 		self.value = fancyheuristic(board, player) if fancy else simpleheuristic(board, player)
-		self.command = command # the move made to generate this state
+		self.command = command # The move made to generate this state
 
+# Dummy classes for representing the players.
 class Black: 
 	def __init__(self): 
 		self.piece = "X"
@@ -34,13 +36,14 @@ class White:
 	def __init__(self): 
 		self.piece = "O"
 
+# Generates a list of all possible successor states to the given board position.
 def successors(board, player):
 	logging.debug("Generating successors for player = " + player.__class__.__name__ + ", board = " + str(board))
 	succs = []
 	for y, line in enumerate(board):
 		for x, char in enumerate(line):
 			if char == player.piece:
-				# try all possible moves: xyN, xyE, xyS, xyW
+				# Try all possible moves: xyN, xyE, xyS, xyW
 				for cmd in (str(x + 1) + str(y + 1) + d for d in directions): 
 					try:
 						candidate = move(cmd, board, player)
@@ -50,6 +53,7 @@ def successors(board, player):
 						# IndexError: try to move outside of the board
 						continue
 	logging.debug("There were " + str(len(succs)) + " successors")
+	# Used for problem 1.2, for determining whether varying the evaluation order matters
 	if args.shuffle:
 		random.shuffle(succs)
 	return succs
@@ -65,14 +69,12 @@ def alphabeta(player, node, depth, alpha, beta):
 	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
 	logging.debug("They are (" + player.__class__.__name__ + "): ")
 	logging.debug("\n".join([c.command + " -> node " + str(hash(c)) for c in succs]))
-	# cut off and return heuristic value if we are too deep down
+	# Cut off and return heuristic value if we are too deep down
 	if depth == cutoff or len(succs) == 0:
 		logging.info("Bottom reached, return utility " + str(node.value) + " from " + str(hash(node)))
 		return node.value
-	# return immediately if we win by making this move
-	# elif winner(node.board) is player:
-	# 	return float("inf")
-	elif player is white: # white is maxplayer (arbitrary pick)
+	# White is maxplayer (arbitrary pick)
+	elif player is white: 
 		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
 			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
@@ -82,7 +84,8 @@ def alphabeta(player, node, depth, alpha, beta):
 				return beta
 		logging.info("No pruning: returning alpha = " + str(alpha) + " from " + str(hash(node)))
 		return alpha
-	else: # black is minplayer
+	# Black is minplayer
+	else: 
 		logging.debug("State is \n" + prettyprint(node.board))
 		for childnode in succs:
 			logging.debug("Entering examination of child " + str(hash(childnode)) + " by " + childnode.command + " from " + str(hash(node)))
@@ -98,26 +101,28 @@ def minmax(player, node, depth):
 		global statesvisited
 		statesvisited += 1
 	logging.debug("Inside minmax on node " + str(hash(node)) + " depth = " + str(depth))
-	minplayer = black # arbitrary
 	if depth == cutoff or not successors(node.board, player):
 		logging.debug("Bottom reached, return utility " + str(node.value))
 		if node.value > 0:
 			logging.debug("Win found:\n" + prettyprint(node.board))
 		return node.value
-	elif node.player is minplayer:
+	# Black is minplayer (arbitrary pick)
+	elif node.player is black:
 		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
 		return min(minmax(player, child, depth + 1) for child in successors(node.board, player))
+	# White is maxplayer
 	else:
 		logging.debug("Recursive minmax: player " + str(player) + ", depth = " + str(depth) + ", node = " + str(hash(node)))
 		return max(minmax(player, child, depth + 1) for child in successors(node.board, player))
 
+# Returns a comma-separated board of X-es and O-s to be printed to console.
 def prettyprint(board):
 	b = "\n".join(",".join(map(str, row)) for row in board)
 	return b.replace("None", " ")
 
+# Check if any consecutive n entries in a row are X-es or O-s, and
+# return the number of n-in-a-row instances on the board for the given player.
 def horizontal(board, n, player):
-	# check if any consecutive n entries in a row are X-es or O-s
-	# return the number of n-in-a-row instances on the board
 	piece = player.piece
 	connected = 0
 	for line in board:
@@ -126,25 +131,28 @@ def horizontal(board, n, player):
 				connected += 1
 	return connected
 
+# Checking verticals is equivalent to checking horizontals in the transposed matrix.
 def vertical(board, n, player):
-	# equivalent to horizontal in the transposed matrix
 	return horizontal(map(list, zip(*board)), n, player)
 
+# All downward diagonals must start in the upper-left 4x4 submatrix, and
+# similarly, all upward diagonals must start in the lower-left 4x4 submatrix.
+# Somewhat inelegant, but it works.
 def diagonal(board, n, player):
-	# all downward diagonals must start in the upper-left 4x4 submatrix
-	# similarly, all upward diagonals must start in the lower-left 4x4 submatrix
-	# somewhat inelegant, but it works
 	piece = player.piece
 	connected = 0
 	for i in range(n):
 		for j in range(n):
+			# Count four down(up)ward from the upper (lower) left quadrant.
 			if (all(board[i + k][j + k] == piece for k in range(n)) 
 			or all(board[6 - i - k][j + k] == piece for k in range(n))):
 				connected += 1
 	return connected
 
+# Indicate the winner (if any) in the given board state.
+# Used, among other things, for the main game loop, which
+# runs as long as there is no winner.
 def winner(board):
-	# indicate the winner (if any) in the given board state
 	if horizontal(board, 4, white) or vertical(board, 4, white) or diagonal(board, 4, white):
 		return white
 	elif horizontal(board, 4, black) or vertical(board, 4, black) or diagonal(board, 4, black):
@@ -152,6 +160,9 @@ def winner(board):
 	else:
 		return None
 
+# Indicated whether the player has managed to thwart the opponent's 
+# play by blocking three of their pieces, thus preventing a loss.
+# Used by the advanced utility function.
 def sabotage(board, player):
 	goal = "OOOX" if player is black else "XXXO"
 	# This is a terrible, terrible hack, and I'm ashamed of it.
@@ -159,25 +170,26 @@ def sabotage(board, player):
 	auxboard = [map(str, l) for l in copy.deepcopy(board)]
 	auxboard = ["".join(l) for l in auxboard]
 	auxtransp = ["".join(l) for l in map(list, zip(*auxboard))]
-	# then look up XXXO and OOOX and their reverses in that string
+	# then look up XXXO and OOOX and their reverses in that string.
 	hor = any(goal in line or goal[::-1] in line for line in auxboard)
 	vert = any(goal in line or goal[::-1] in line for line in auxtransp)
-	# diagonal is a bit more tricky, but the same reasoning applies as 
+	# The diagonal is a bit more tricky, but the same reasoning applies as 
 	# in the horizontal(board, n, player) function.
-	# all interesting diagonals start in the upper or lower left quandrants
+	# All interesting diagonals start in the upper or lower left quandrants,
+	# so we make a list of them, join each of them up and look 
+	# for the OOOX and XXXO strings and their reverses there.
 	diags = []
 	for i in range(4):
 		for j in range(4):
-			print i, j
 			diags.append([board[i + k][j + k] for k in range(4)])
 			diags.append([board[6 - i - k][j + k] for k in range(4)])
-	# map elements to string and concatenate with empty string
+	# Map elements to string and concatenate with empty string.
 	diags = ["".join(l) for l in [map(str, l) for l in diags]]
 	diag = any(goal in line or goal[::-1] in line for line in diags)
 	return hor or vert or diag
 
+# As given in problem 1.
 def simpleheuristic(board, player):
-	# as given in problem 1
 	otherplayer = white if player is black else black
 	if winner(board) is player:
 		return 1
@@ -186,6 +198,8 @@ def simpleheuristic(board, player):
 	else:
 		return 0
 
+# A somewhat more advanced heuristic, used for part 2 of the assignment
+# and actual gameplay. See the submitted report for details and discussion.
 def fancyheuristic(board, player):
 	otherplayer = white if player is black else black
 	score = 0
@@ -194,15 +208,14 @@ def fancyheuristic(board, player):
 		v = vertical(board, i, player)
 		d = diagonal(board, i, player)
 		score += (10 ** i) * (h + v + d)
-	if sabotage(player):
+	if sabotage(board, player):
 		score += 9999
-	elif sabotage(otherplayer):
+	elif sabotage(board, otherplayer):
 		score -= 9999
 	return score
 
+# Builds a matrix from an input string, in case we want to specify an initial board layout.
 def parseboard(boardstring):
-	# in case we want to specify an initial board layout,
-	# build a matrix from the given string (notation as in assignment)
 	boardstring = string.replace(boardstring, ",", "")
 	board, line = [], []
 	for char in boardstring:
@@ -214,23 +227,23 @@ def parseboard(boardstring):
 		else: 
 			line.append(char)
 	if line:
-		board.append(line) # last line, if there is no newline at the end
+		board.append(line) # Last line, if there is no newline at the end
 	return board
 
-
+# Performs a move according to a given command, and returns the new game state.
 def move(command, board, player):
-	# takes indices and a direction, e.g. "43W" or "26N"
+	# Takes indices and a direction, e.g. "43W" or "26N".
 	x, y, d = tuple(command)
-	# the board is a zero-indexed array, adjust accordingly
+	# The board is a zero-indexed array, adjust accordingly
 	x, y = int(x) - 1, int(y) - 1
 	dy, dx = directions[d.upper()]
-	# does the piece fall within the bounds?
+	# Does the piece fall within the bounds?
 	if ((0 <= x + dx <= 7) and (0 <= y + dy <= 7)
-	# and is it our piece?
+	# ...and is it our piece?
 	and board[y][x] == player.piece
-	# and is the destination square empty?
+	# ...and is the destination square empty?
 	and not board[y + dy][x + dx]):
-		# then it's okay
+		# ...then it's okay
 		successor = copy.deepcopy(board)
 		successor[y + dy][x + dx] = successor[y][x]
 		successor[y][x] = None
@@ -238,7 +251,7 @@ def move(command, board, player):
 	else:
 		raise ValueError("The move " + command + " by " + player.__class__.__name__ + " is not legal")
 
-
+# Parse command-line arguments. See submitted report for summary of usage.
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--cutoff", help="Cutoff depth")
 parser.add_argument("-i", "--input", help="Input game board")
@@ -252,17 +265,18 @@ parser.add_argument("-t", "--time", help="Timeout limit in seconds")
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
-useab = not (args.alg == "mm") # alpha-beta by default
+useab = not (args.alg == "mm") # Alpha-beta by default
 logthegame = args.log
 countingstates = args.count
 fancy = args.fancy
 timeout = float(args.time) if args.time else float("inf")
 
+# If we give an input file, parse it and set up the initial board layout accordingly.
 if args.input:
 	with open(args.input, "r") as inputfile:
 		initstr = inputfile.read()
 	board = parseboard(initstr)
-else:
+else: # If not, default to the starting position from the assignment.
 	board = [
 		["O", None, None, None, None, None, "X"],
 		["X", None, None, None, None, None, "O"],
@@ -273,9 +287,12 @@ else:
 		["O", None, None, None, None, None, "X"]
 	]
 
+# Player instances
 white = White()
 black = Black()
 
+# Designate a human player to a color if one is given, 
+# else let the computer play against itself.
 if args.human == "w":
 	human = white
 	computer = black
@@ -284,14 +301,16 @@ elif args.human == "b":
 	computer = white
 else:
 	human = None
-	computer = black # arbitrary
+	computer = black # Arbitrary choice
 
+# Other administrivia
 currentplayer = white
-
 log = ["Initial state:"]
 movenumber = 1
 
+# Main loop. Runs as long as there is no winner, or until interrupted.
 while winner(board) is None:
+	# Print informative stuff at the beginning of each round.
 	playername = currentplayer.__class__.__name__
 	p = prettyprint(board)
 	print p
@@ -301,24 +320,30 @@ while winner(board) is None:
 		log.append(p)
 		log.append("\nMove #%s:" % movenumber)
 		log.append("It's %s's turn." % playername)
-	cmd = "" # command string, e.g. 11E or 54N
-	try:
+		
+	cmd = "" # Command string, e.g. 11E or 54N
+	
+	try: # In case of keyboard interrupts
+		# Show a list of options to human players:
 		if currentplayer is human:
 			print "Possible moves:"
 			for s in successors(board, currentplayer):
 				print s.command
 			cmd = raw_input() 
+		# Otherwise, have the computer calculate its move using the given algorithm.
 		else:
-			t = time.time() # time limit is 20 seconds
-			succs = successors(board, currentplayer)
-			# take the first move, pick something better later on if we can find it
+			t = time.time() # Time limit is 20 seconds
+			succs = successors(board, currentplayer) # Successors of this state
+			# Take the first move, pick something better later on if we can find it.
 			bestmove = succs[0].command
 			bestutility = 0
-			if useab: # alpha-beta pruning
+			
+			# Pick algorithm according to --alg argument.
+			if useab: # Alpha-beta pruning
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
 				for succ in succs:
-					# init with alpha = -inf, beta = inf
+					# Initialize with alpha = -inf, beta = inf
 					u = alphabeta(currentplayer, succ, 0, float("-inf"), float("inf"))
 					if u > bestutility:
 						bestutility = u
@@ -326,7 +351,7 @@ while winner(board) is None:
 					if time.time() - t > timeout:
 						print "Time limit cutoff"
 						break
-			else: # minmax
+			else: # Minmax
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
 				for succ in succs:
@@ -338,31 +363,39 @@ while winner(board) is None:
 					if time.time() - t > timeout:
 						print "Time limit cutoff"
 						break
+			
 			cmd = bestmove
 			print "The computer makes the move", cmd
 			logging.info("Best utility was " + str(bestutility))
 			print "Thinking took", time.time() - t, "seconds"
 			if logging:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
-		# may raise a ValueError if input is ill-formed:
+		
+		# May raise a ValueError if input is ill-formed.
 		board = move(cmd, board, currentplayer)
+		
 		if countingstates:
 			print statesvisited
 			raise Exception("Counting states only, stopping here")
 		if logthegame:
 			log.append("%s plays %s" % (playername, cmd))
+		
+		# Move to next round
 		currentplayer = white if currentplayer is black else black
 		playername = currentplayer.__class__.__name__
 		movenumber += 1
-	except ValueError:
+	
+	# Catch errors made by user when entering a command:
+	except ValueError: 
 		print "Illegal move."
+	# Possibility for interrupting computation it takes too long.
 	except KeyboardInterrupt:
 		if logthegame:
 			log.append("Game cancelled.")
 		logging.critical("Game cancelled.")
 		break
 
-# post-game formalities
+# Post-game formalities: print the board one last time, logging
 print prettyprint(board)
 
 if winner(board):
