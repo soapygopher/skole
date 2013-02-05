@@ -1,4 +1,4 @@
-\documentclass[letterpaper, 12pt]{article}
+\documentclass[letterpaper, 11pt]{article}
 
 \usepackage[english]{custompack}
 \usepackage{fullpage}
@@ -55,10 +55,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 77,445 & 1,276,689 & 21,335,620 &  \\
-		$\alpha$-$\beta$ pruning & 4129 & 48,203 & 694,652 &  \\
+		Minmax & 77,445 & 1,276,689 & 21,335,620 &  Unknown \\
+		$\alpha$-$\beta$ pruning & 4129 & 48,203 & 694,652 & Unknown \\
 		\midrule
-		Improvement & $\times$18.76 & $\times$26.49 & $\times$30.72 & ?
+		Improvement & $\times$18.76 & $\times$26.49 & $\times$30.72 & Unknown
 	\end{tabular}
 \end{table}
 
@@ -69,10 +69,10 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 98,345 & 1,704,319 & 29,770,996 & \\
-		$\alpha$-$\beta$ pruning & 6421 & 96,884 & 1,683,194 &  \\
+		Minmax & 98,345 & 1,704,319 & 29,770,996 & Unknown \\
+		$\alpha$-$\beta$ pruning & 6421 & 96,884 & 1,683,194 & Unknown \\
 		\midrule
-		Improvement & $\times$15.32 & $\times$17.59 & $\times$17.69 & ?
+		Improvement & $\times$15.32 & $\times$17.59 & $\times$17.69 & Unknown
 	\end{tabular}
 \end{table}
 
@@ -83,30 +83,53 @@ Game A:
 	\begin{tabular}{lrrrr}
 		Cutoff depth & 3 & 4 & 5 & 6 \\
 		\midrule
-		Minmax & 69,954 & 1,237,535 & 22,191,032 & \\
-		$\alpha$-$\beta$ pruning & 3763 & 51,098 & 840,633 &  \\
+		Minmax & 69,954 & 1,237,535 & 22,191,032 & Unknown \\
+		$\alpha$-$\beta$ pruning & 3763 & 51,098 & 840,633 & Unknown \\
 		\midrule
-		Improvement & $\times$18.59 & $\times$24.22 & $\times$26.40 & ?
+		Improvement & $\times$18.59 & $\times$24.22 & $\times$26.40 & Unknown
 	\end{tabular}
 \end{table}
 
-In my code I consider the children of the current state to be on cutoff level 0; their children, i.e., the grandchildren of the current state, are on level 1, and so on.\footnote{If the current state's children should instead be regarded as being on level 1, the values in the tables above should be shifted one column to the right.} The heuristic evaluation of the node is returned when the depth reaches the limit given by the \texttt{--cutoff} argument. 
+\noindent This game has a high branching factor, in the ballpark of about 16 possible moves for each round, which makes exploring the game tree to any significant depth a very time-consuming chore. I didn't have time to calculate the numbers for cutoff depth 6, but they should be at least one order of magnitude higher than for the previous depth.%, i.e., something like $4 \times 10^9$.
+
+An interesting observation is that alpha-beta pruning seems to be increasingly efficient at chopping off irrelevant branches of the game tree as the cutoff depth increases.\footnote{In my code I consider the children of the current state to be in ply 0; their children, i.e., the grandchildren of the current state, are in ply 1, and so on. If this interpretation is incorrect and the current state's children should instead be regarded as being on ply 1, the values in the tables above should be shifted one column to the right.} Observe, for example, that in game A the number of states visited by minmax with cutoff depth 3 was 18 times higher than the number visited by alpha-beta, while it was over 30 times higher when the cutoff depth was 5.
+
+%The heuristic evaluation of the node is returned when the depth reaches the limit given by the \texttt{--cutoff} argument. 
 
 \subsection{Does state generation order matter?}
-My evaluation function iterates through the successor states in the order they were generated: left-to-right, top-to-bottom, with the directions generated in the (arbitrary) order north-east-south-west. I considered the first move in game A and ran\footnote{The commands given were \texttt{python ass1.py --input starta.txt --cutoff 3 --alg ab --count --shuffle}. See the appendix for details on usage.} alpha-beta pruning five times with a cutoff depth of 3, shuffling the list of successor states randomly every time one is generated. (Since the minmax algorithm does not prune the game tree at all, the order in which it evaluates successors is irrelevant.) Alpha-beta pruning with the non-shuffled evaluation order visited 4129 states, as per the table above. 
+My evaluation function iterates through the successor states in the order they were generated: left-to-right, top-to-bottom, with the directions generated in the (arbitrary) order north-east-south-west. I considered the first move in game A and ran\footnote{The commands given were \texttt{python ass1.py --input starta.txt --cutoff 3 --alg ab --count --shuffle}. See the appendix for details on usage.} alpha-beta pruning five times with a cutoff depth of 3, shuffling the list of successor states randomly every time one is generated. (Since the minmax algorithm does not prune the game tree at all, the order in which it evaluates successors is irrelevant.) 
 
-I found that evaluation order \emph{did} matter, though not impressively so. The sample runs visited 4480, 4338, 4324, 4114, and 4376 states, respectively, for an average of 4326 states, which is $4.77\%$ more than the non-shuffled case. The maximum deviations were $8.5\%$ more and $0.36\%$ fewer states visited than the original order. I also tried evaluating states in the reverse order; the difference was negligble. This suggests that there is no significant benefit to be gained by shuffling; in fact, we see that more states were visited with alternative evaluation orders than with the original sequence. I don't know if this is a coincidence or if the order I picked is somehow optimal.
+I found that evaluation order \emph{did} matter, though not impressively so. Alpha-beta pruning with the non-shuffled evaluation order visited 4129 states, as per the table above. The sample runs with suffling visited 4480, 4338, 4324, 4114, and 4376 states, respectively, for an average of 4326 states, which is $4.77\%$ more than the non-shuffled case. The maximum deviations were $8.5\%$ more and $0.36\%$ fewer states visited than the original order. I also tried evaluating states in the reverse order; the difference was negligble. This suggests that there is no significant benefit to be gained by shuffling; in fact, we see that more states were visited with alternative evaluation orders than with the original sequence. I don't know if this is a coincidence or if the order I picked is somehow optimal; alpha-beta pruning should perform best when the best branches of the game tree are explored early, and most of the subsequent branches are pruned. 
 
 
 \section{}
 \subsection{Choice of evaluation function}
+The \texttt{fancyheuristic} function calculates a heuristic value for a given player in a given board state. Let $n_i$ be the number of $i$-in-a-row instances the player has on the board, either horizontally, vertically, or diagonally. For example, if the player has 3 pieces in a row at two different spots on the board, we have $n_3 = 2$. This number is multiplied by a corresponding power of 10, so that more weight is given to board states with more pieces connected:
 \[ s = \sum_{i=2}^4 n_i \cdot 10^i \]
+This ensures that the player gets a higher score 
+
+Suppose, for example, the 
 
 \subsection{Number of states visited with advanced heuristic}
+The more advanced heuristic does \emph{not} reduce the number of states visited, which I found surprising.
+Game A:
+\begin{table}[h]
+	\centering
+	\small
+	\begin{tabular}{lrrrr}
+		Cutoff depth & 3 & 4 & 5 & 6 \\
+		\midrule
+		Minmax & 77,445 &&& \\
+		$\alpha$-$\beta$ pruning & 22,291 &&&\\
+		\midrule
+		Improvement & $\times$x & $\times$x & $\times$x & Unknown
+	\end{tabular}
+\end{table}
 
 \subsection{Tradeoff between evaluation function and game tree depth}
-My evaluation function is not particularly efficient. It does 
 
+\section*{Other comments}
+Threading, improved heuristic, optimizing for speed
 
 \clearpage
 \appendix
@@ -118,17 +141,19 @@ My evaluation function is not particularly efficient. It does
 All arguments are optional:
 \begin{itemize}
 	\item \texttt{-i} or \texttt{--input}: Specify an input file to be used as the initial game state. A plain-text file following the notation used in the assignment is expected. Defaults to the example illustrated in the ``Introduction'' part of the assignment text.
-	\item \texttt{-u} or \texttt{--human}: The computer should play against a human adversary, not just against itself. The user will be prompted for input when it is their turn to play.
+	\item \texttt{-u} or \texttt{--human}: The computer should play against a human adversary, not just against itself. May take values \texttt{w} or \texttt{b} to indicate that the human should be white or black, respectively. The user will be prompted for input when it is their turn to play.
 	\item \texttt{-c} or \texttt{--cutoff}: Specify a cutoff depth. Defaults to 3.
 	\item \texttt{-a} or \texttt{--alg}: Specify which of the minmax or alpha-beta pruning algorithms is to be used. May take values \texttt{mm} or \texttt{ab}. Defaults to alpha-beta pruning.
-	\item \texttt{-l} or \texttt{--log}: A log file should be written on exit.
+	\item \texttt{-l} or \texttt{--log}: A log file should be written on exit. May prove useful for the tournament.
 	\item \texttt{-k} or \texttt{--count}: Count the number of states visited. Used for problem 1.1.
 	\item \texttt{-s} or \texttt{--shuffle}: Shuffle the list of successor states before evaluating them. Used for problem 1.2.
+	\item \texttt{-f} or \texttt{--fancy}: Indicate that the advanced heuristic should be used. 
+	\item \texttt{-t} or \texttt{--time}: Time limit (in seconds) for each move.
 \end{itemize}
-Example: \texttt{python ass1.py --input file.txt --alg ab --human --log}
+Example: \texttt{python ass1.py --input file.txt --alg ab --human w --time 20 --fancy --log}
 
 \subsection{Listing}
-I've expunged all logging statements and other debugging aids for the sake of readability. 
+The code is written in Python 2.7. I've expunged all logging statements and other debugging aids for the sake of readability. 
 \lstinputlisting{./ass1.py}
 
 \end{document}
