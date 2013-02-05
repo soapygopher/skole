@@ -59,7 +59,7 @@ def alphabeta(player, node, depth, alpha, beta):
 		global statesvisited
 		statesvisited += 1
 	succs = successors(node.board, player)
-	otherplayer = black if player is white else black
+	otherplayer = white if player is black else black
 	logging.info("Inside alphabeta on node " + str(hash(node)) + " obtained by " + node.command)
 	logging.info(str(hash(node)) + " looks like\n" + prettyprint(node.board))
 	logging.info(str(hash(node)) + " has depth = " + str(depth) + ", children = " + str(len(succs)))
@@ -138,7 +138,8 @@ def diagonal(board, n, player):
 	connected = 0
 	for i in range(n):
 		for j in range(n):
-			if all(board[i + k][j + k] == piece for k in range(n)) or all(board[6 - i - k][j + k] == piece for k in range(n)):
+			if (all(board[i + k][j + k] == piece for k in range(n)) 
+			or all(board[6 - i - k][j + k] == piece for k in range(n))):
 				connected += 1
 	return connected
 
@@ -152,7 +153,28 @@ def winner(board):
 		return None
 
 def sabotage(board, player):
-	pass
+	goal = "OOOX" if player is black else "XXXO"
+	# This is a terrible, terrible hack, and I'm ashamed of it.
+	# Map the elements in the matrix to strings, concatenate,
+	auxboard = [map(str, l) for l in copy.deepcopy(board)]
+	auxboard = ["".join(l) for l in auxboard]
+	auxtransp = ["".join(l) for l in map(list, zip(*auxboard))]
+	# then look up XXXO and OOOX and their reverses in that string
+	hor = any(goal in line or goal[::-1] in line for line in auxboard)
+	vert = any(goal in line or goal[::-1] in line for line in auxtransp)
+	# diagonal is a bit more tricky, but the same reasoning applies as 
+	# in the horizontal(board, n, player) function.
+	# all interesting diagonals start in the upper or lower left quandrants
+	diags = []
+	for i in range(4):
+		for j in range(4):
+			print i, j
+			diags.append([board[i + k][j + k] for k in range(4)])
+			diags.append([board[6 - i - k][j + k] for k in range(4)])
+	# map elements to string and concatenate with empty string
+	diags = ["".join(l) for l in [map(str, l) for l in diags]]
+	diag = any(goal in line or goal[::-1] in line for line in diags)
+	return hor or vert or diag
 
 def simpleheuristic(board, player):
 	# as given in problem 1
@@ -165,13 +187,17 @@ def simpleheuristic(board, player):
 		return 0
 
 def fancyheuristic(board, player):
-	otherplayer = white if player is black else white
+	otherplayer = white if player is black else black
 	score = 0
 	for i in [4, 3, 2]:
 		h = horizontal(board, i, player)
 		v = vertical(board, i, player)
 		d = diagonal(board, i, player)
 		score += (10 ** i) * (h + v + d)
+	if sabotage(player):
+		score += 9999
+	elif sabotage(otherplayer):
+		score -= 9999
 	return score
 
 def parseboard(boardstring):
@@ -222,6 +248,7 @@ parser.add_argument("-l", "--log", help="Write a game log on exit", action="stor
 parser.add_argument("-s", "--shuffle", help="Shuffle successor list", action="store_true")
 parser.add_argument("-k", "--count", help="Count states visited", action="store_true")
 parser.add_argument("-f", "--fancy", help="Fancy heuristic function", action="store_true")
+parser.add_argument("-t", "--time", help="Timeout limit in seconds")
 args = parser.parse_args()
 
 cutoff = int(args.cutoff) if args.cutoff else 3
@@ -229,6 +256,7 @@ useab = not (args.alg == "mm") # alpha-beta by default
 logthegame = args.log
 countingstates = args.count
 fancy = args.fancy
+timeout = float(args.time) if args.time else float("inf")
 
 if args.input:
 	with open(args.input, "r") as inputfile:
@@ -289,28 +317,35 @@ while winner(board) is None:
 			if useab: # alpha-beta pruning
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using alphabeta with cutoff " + str(cutoff))
-				for succboard in succs:
+				for succ in succs:
 					# init with alpha = -inf, beta = inf
-					u = alphabeta(currentplayer, succboard, 0, float("-inf"), float("inf"))
+					u = alphabeta(currentplayer, succ, 0, float("-inf"), float("inf"))
 					if u > bestutility:
 						bestutility = u
-						bestmove = succboard.command
+						bestmove = succ.command
+					if time.time() - t > timeout:
+						print "Time limit cutoff"
+						break
 			else: # minmax
 				logging.warning("Player " + playername + " thinking about what to do.")
 				logging.warning("Using minmax with cutoff " + str(cutoff))
-				for succboard in succs:
-					u = minmax(currentplayer, succboard, 0)
+				for succ in succs:
+					u = minmax(currentplayer, succ, 0)
 					if u > bestutility:
-						logging.critical("Utility improved: " + str(u) + " from " + succboard.command)
+						logging.critical("Utility improved: " + str(u) + " from " + succ.command)
 						bestutility = u
-						bestmove = succboard.command
+						bestmove = succ.command
+					if time.time() - t > timeout:
+						print "Time limit cutoff"
+						break
 			cmd = bestmove
 			print "The computer makes the move", cmd
+			logging.info("Best utility was " + str(bestutility))
 			print "Thinking took", time.time() - t, "seconds"
 			if logging:
 				log.append("Thinking took " + str(time.time() - t) + " seconds")
 		# may raise a ValueError if input is ill-formed:
-		board = move(cmd, board, currentplayer) 
+		board = move(cmd, board, currentplayer)
 		if countingstates:
 			print statesvisited
 			raise Exception("Counting states only, stopping here")
@@ -321,7 +356,6 @@ while winner(board) is None:
 		movenumber += 1
 	except ValueError:
 		print "Illegal move."
-		#raise
 	except KeyboardInterrupt:
 		if logthegame:
 			log.append("Game cancelled.")
