@@ -3,5 +3,4 @@
 *.aux
 *.log
 *.pdf
-
-ai/Assignment 1/ass1-feb1-2332.py
+*.pyc
