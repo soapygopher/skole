@@ -1,15 +1,6 @@
 import random, logging, copy
 logging.basicConfig(level=logging.CRITICAL)
 
-r = -0.04
-board = [
-	[r, r,    None, r],
-	[r, r,    r,    r],
-	[r, None, r,   -1],
-	[r, r,    r,    1]
-]
-
-
 dirs = {
 	"N": (-1, 0),
 	"E": (0, 1),
@@ -18,8 +9,8 @@ dirs = {
 }
 
 def prettyprint(board):
-	b = "\n".join("\t".join(map(str, row)) for row in board)
-	return b.replace("None", "XXX")
+	board = [[round(x, 3) if x else "[   ]" for x in row] for row in board]
+	return "\n".join("\t".join(map(str, row)) for row in board)
 
 def rotate(forward, rotation):
 	if forward == "N":
@@ -41,7 +32,7 @@ def move(intended):
 		direction = rotate(intended, "right")
 	return direction
 
-def valuefrom(x, y, direction):
+def valuefrom(board, x, y, direction):
 	logging.info("Looking at position " + str(x) + str(y))
 	dy, dx = dirs[direction]
 	ldy, ldx = dirs[rotate(direction, "left")]
@@ -64,27 +55,36 @@ def valuefrom(x, y, direction):
 	logging.info("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
 	return (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
 
-print prettyprint(board)
-print
-
-convergence = False
-while not convergence:
-	#nextiterboard = [[r for x in range(4)] for y in range(4)]
-	nextiterboard = copy.deepcopy(board)
-	for y, line in enumerate(board):
-		for x, cell in enumerate(line):
-			if (x == 3 and y == 3) or (x == 3 and y == 2):
-				logging.info("Cell " + str(x) + str(y) + " is not updated")
-				continue
-			elif (x == 2 and y == 0) or (x == 1 and y == 2):
-				logging.info("Cell " + str(x) + str(y) + " is useless")	
-				continue
-			newval = cell
-			for direction in dirs:
-				newval += valuefrom(x, y, direction)
-				logging.info("Cell " + str(x) + str(y) + " updated to " + str(newval))
-			nextiterboard[y][x] = newval
-	board = nextiterboard
+def valueiteration():
+	r = -0.04
+	gamma = 0.9
+	board = [
+		[r, r,    None, r],
+		[r, r,    r,    r],
+		[r, None, r,   -1],
+		[r, r,    r,    1]
+	]
 	print prettyprint(board)
 	print
+	convergence = False
+	while not convergence:
+		nextiterboard = copy.deepcopy(board)
+		for y, line in enumerate(board):
+			for x, cell in enumerate(line):
+				if (x == 3 and y == 3) or (x == 3 and y == 2):
+					logging.info("Cell " + str(x) + str(y) + " is a terminal")
+					continue
+				elif (x == 2 and y == 0) or (x == 1 and y == 2):
+					logging.info("Cell " + str(x) + str(y) + " is useless")	
+					continue
+				northval = valuefrom(board, x, y, "N")
+				southval = valuefrom(board, x, y, "S")
+				westval = valuefrom(board, x, y, "W")
+				eastval = valuefrom(board, x, y, "E")
+				cell += gamma * max(eastval, westval, southval, northval)
+				nextiterboard[y][x] = cell
+		board = nextiterboard
+		print prettyprint(board)
+		print
 
+valueiteration()
