@@ -94,4 +94,51 @@ def valueiteration():
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
 
+def policyiteration():
+	epsilon = 0.0001
+	delta = 0
+	reward = -0.04
+	gamma = 0.9
+	board = [
+		[reward, reward, None,   reward],
+		[reward, reward, reward, reward],
+		[reward, None,   reward,     -1],
+		[reward, reward, reward,      1]
+	]
+	policyboard = [
+		["N", "N", "N", "N"],
+		["N", "N", "N", "N"],
+		["N", "N", "N", "N"],
+		["N", "N", "N", "N"]
+	]
+	iterationnumber = 1
+	convergence = False
+	unchanged = True
+	while not convergence:
+		delta = 0
+		print "iteration", iterationnumber
+		print prettyprint(board)
+		print
+		nextiterboard = copy.deepcopy(board)
+		for y, line in enumerate(board):
+			for x, cell in enumerate(line):
+				if (x == 3 and y == 3) or (x == 3 and y == 2):
+					logging.info("Cell " + str(x) + str(y) + " is a terminal")
+					continue
+				elif (x == 2 and y == 0) or (x == 1 and y == 2):
+					logging.info("Cell " + str(x) + str(y) + " is useless")	
+					continue
+				northval = valuefromcell(board, x, y, "N")
+				southval = valuefromcell(board, x, y, "S")
+				westval = valuefromcell(board, x, y, "W")
+				eastval = valuefromcell(board, x, y, "E")
+				newvalue = reward + gamma * max(eastval, westval, southval, northval)
+				delta = max(delta, newvalue - nextiterboard[y][x])
+				#print "delta ", delta
+				nextiterboard[y][x] = newvalue
+		board = nextiterboard
+		convergence = delta < epsilon * (1 - gamma) / gamma
+		iterationnumber += 1
+
 valueiteration()
+#policyiteration()
