@@ -1,7 +1,8 @@
-\documentclass[letterpaper, 10pt, twocolumn]{article}
+\documentclass[letterpaper, 10pt]{article}
 
 \usepackage[english]{custompack}
 \usepackage{fullpage}
+\usepackage{multicol}
 %\usepackage{hyperref}
 %\usepackage{abcproblem}
 %\renewcommand{\thesubsection}{\alph{subsection}}
@@ -16,21 +17,28 @@
 \begin{document}
 \maketitle
 \noindent
+\begin{multicols}{2}
 
 \section{}
 \subsection{State utilities, optimal policy}
 After 42 iterations, the values converged:
 \[
-\begin{bmatrix}
-0.078 & 0.027 &       & -0.187 \\
-0.169 & 0.084 & 0.102 & -0.154 \\
-0.283 &       & 0.257 & -1 \\
-0.392 & 0.549 & 0.699 & 1
-\end{bmatrix}
+	\begin{bmatrix}
+		0.078 & 0.027 &       & -0.187 \\
+		0.169 & 0.084 & 0.102 & -0.154 \\
+		0.283 &       & 0.257 & -1 \\
+		0.392 & 0.549 & 0.699 & 1
+	\end{bmatrix}
 \]
 
 
 \subsection{Linear algebra policy evaluation}
+To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have  $u_{12} \leftarrow 0.1 u_{11} + 0.7 u_{12} + 0.2 u_{13}$ because going south from $(1,2)$ will make us bounce back to that same spot, while $u_{33} \leftarrow 0.1 u_{32} + 0.7 u_{23} + 0.2 u_{34}$ as expected. 
+
+Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states. The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. Since the matrix is too big to fit here, please see appendix A.
+
+The ``special'' states, i.e., the terminals $(1,4)$ and $(2,4)$ as well as the blocked squares $(2,2)$ and $(4,3)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. This is represented by these rows having a weight of $1$ on the corresponding column.
+
 
 \subsection{State utilities linear in $r$}
 
@@ -52,9 +60,61 @@ After 42 iterations, the values converged:
 
 \subsection{State utilities, optimal policy}
 
-%\clearpage
-%\appendix
-%\section{Tables}
+\end{multicols}
 
+\clearpage
+\appendix
+\section*{Appendices}
+\section{Tables and matrices}
+\subsection{The linear system from problem 1.2}
+
+\[
+% A
+\left[
+\begin{array}{cccc|cccc|cccc|cccc}
+%11 & 12   & 13  & 14  & 21  & 22  & 23  & 24  & 31  & 32  & 33  & 34  & 41  & 42  & 43  & 44
+0.8 & 0.2  & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 11
+0.1 & 0.7  & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 12
+0   & 0.1  & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 13
+0   & 0    & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 14
+\hline
+0.7 & 0    & 0   & 0   & 0.3 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 21
+0   & 0    & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 22
+0   & 0    & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 23
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 24
+\hline
+0   & 0    & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   \\ % 31
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.1 & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   \\ % 32
+0   & 0    & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   \\ % 33
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   \\ % 34
+\hline
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   \\ % 41
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0.1 & 0.2 & 0   & 0   \\ % 42
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   \\ % 43
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.3    % 44
+\end{array}
+\right]
+% u
+\begin{bmatrix}
+u_{11} \\
+u_{12} \\
+u_{13} \\
+u_{14} \\
+u_{21} \\
+u_{22} \\
+u_{23} \\
+u_{24} \\
+u_{31} \\
+u_{32} \\
+u_{33} \\
+u_{34} \\
+u_{41} \\
+u_{42} \\
+u_{43} \\
+u_{44}
+\end{bmatrix}
+=
+% b
+\]
 
 \end{document}
