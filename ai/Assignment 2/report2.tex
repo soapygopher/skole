@@ -20,8 +20,8 @@
 \begin{multicols}{2}
 
 \section{}
-\subsection{State utilities, optimal policy}
-After 42 iterations, the values converged:
+\subsection{State utilities and optimal policy}
+After 42 iterations, the values converged to the following:
 \[
 	\begin{bmatrix}
 		0.078 & 0.027 &       & -0.187 \\
@@ -31,16 +31,25 @@ After 42 iterations, the values converged:
 	\end{bmatrix}
 \]
 
+\[
+	\begin{bmatrix}
+		0.078 & 0.027 &       & -0.187 \\
+		0.169 & 0.084 & 0.102 & -0.154 \\
+		0.283 &       & 0.257 &  \\
+		0.392 & 0.549 & 0.699 & 
+	\end{bmatrix}
+\]
+
 
 \subsection{Linear algebra policy evaluation}
-To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have  $u_{12} \leftarrow 0.1 u_{11} + 0.7 u_{12} + 0.2 u_{13}$ because going south from $(1,2)$ will make us bounce back to that same spot, while $u_{33} \leftarrow 0.1 u_{32} + 0.7 u_{23} + 0.2 u_{34}$ as expected. 
+To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{12}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{32} + 0.7 u_{23} + 0.2 u_{34}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
 
 Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states. The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. Since the matrix is too big to fit here, please see appendix A.
 
 The ``special'' states, i.e., the terminals $(1,4)$ and $(2,4)$ as well as the blocked squares $(2,2)$ and $(4,3)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. This is represented by these rows having a weight of $1$ on the corresponding column.
 
 
-\subsection{State utilities linear in $r$}
+\subsection{State utilities are linear in $r$}
 
 \subsection{Utility plot I}
 
@@ -58,16 +67,16 @@ The ``special'' states, i.e., the terminals $(1,4)$ and $(2,4)$ as well as the b
 
 \subsection{Possible actions}
 
-\subsection{State utilities, optimal policy}
+\subsection{State utilities and optimal policy}
 
 \end{multicols}
 
 \clearpage
 \appendix
-\section*{Appendices}
+%\section*{Appendices}
 \section{Tables and matrices}
 \subsection{The linear system from problem 1.2}
-
+I added lines to identify $(4 \times 4)$ submatrices for the sake of readability.
 \[
 % A
 \left[
