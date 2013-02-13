@@ -32,7 +32,7 @@ def move(intended):
 		direction = rotate(intended, "right")
 	return direction
 
-def valuefromcell(board, x, y, direction):
+def valuefromcell(board, x, y, direction, policy=False):
 	logging.info("Looking at position " + str(x) + str(y))
 	dy, dx = dirs[direction]
 	ldy, ldx = dirs[rotate(direction, "left")]
@@ -48,17 +48,26 @@ def valuefromcell(board, x, y, direction):
 	if (0 <= x + rdx <= 3) and (0 <= y + rdy <= 3):
 		rightcell = board[y + rdy][x + rdx]
 		rightcell = rightcell if rightcell else board[y][x]
-	logging.info("Right value is " + str(rightcell))
-	logging.info("Front value is " + str(frontcell))
-	logging.info("Left value is " + str(leftcell))
-	avg = (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
-	logging.info("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
-	return (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
+	# logging.info("Right value is " + str(rightcell))
+	# logging.info("Front value is " + str(frontcell))
+	# logging.info("Left value is " + str(leftcell))
+	# avg = (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
+	# logging.info("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
+	if policy:
+		if frontcell[0] is None:
+			frontcell = (0, frontcell[1])
+		if leftcell[0] is None:
+			leftcell = (0, leftcell[1])
+		if rightcell[0] is None:
+			rightcell = (0, rightcell[1])
+		#print x, y, "f", frontcell, "l", leftcell, "r", rightcell
+		return (0.7 * frontcell[0]) + (0.2 * leftcell[0]) + (0.1 * rightcell[0])
+	else:
+		return (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
 
-def valueiteration():
+def valueiteration(reward):
+	print "Value iteration:"
 	epsilon = 0.0001
-	delta = 0
-	reward = -0.04
 	gamma = 0.9
 	board = [
 		[reward, reward, None,   reward],
@@ -70,9 +79,6 @@ def valueiteration():
 	convergence = False
 	while not convergence:
 		delta = 0
-		print "iteration", iterationnumber
-		print prettyprint(board)
-		print
 		nextiterboard = copy.deepcopy(board)
 		for y, line in enumerate(board):
 			for x, cell in enumerate(line):
@@ -88,36 +94,30 @@ def valueiteration():
 				eastval = valuefromcell(board, x, y, "E")
 				newvalue = reward + gamma * max(eastval, westval, southval, northval)
 				delta = max(delta, newvalue - nextiterboard[y][x])
-				#print "delta ", delta
 				nextiterboard[y][x] = newvalue
 		board = nextiterboard
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
+	print "Convergence in iteration", iterationnumber - 1
+	print prettyprint(board)
+	
 
-def policyiteration():
+def policyiteration(reward):
+	print "Policy iteration"
 	epsilon = 0.0001
-	delta = 0
-	reward = -0.04
 	gamma = 0.9
 	board = [
-		[reward, reward, None,   reward],
-		[reward, reward, reward, reward],
-		[reward, None,   reward,     -1],
-		[reward, reward, reward,      1]
-	]
-	policyboard = [
-		["N", "N", "N", "N"],
-		["N", "N", "N", "N"],
-		["N", "N", "N", "N"],
-		["N", "N", "N", "N"]
+		[(reward, "N"), (reward, "N"), (None, ""),   (reward, "N")],
+		[(reward, "N"), (reward, "N"), (reward, "N"), (reward, "N")],
+		[(reward, "N"), (None, ""),   (reward, "N"), (-1, "")],
+		[(reward, "N"), (reward, "N"), (reward, "N"), (1, "")]
 	]
 	iterationnumber = 1
-	convergence = False
-	unchanged = True
-	while not convergence:
-		delta = 0
+	change = True
+	while change:
+		change = False
 		print "iteration", iterationnumber
-		print prettyprint(board)
+		print (board)
 		print
 		nextiterboard = copy.deepcopy(board)
 		for y, line in enumerate(board):
@@ -128,17 +128,39 @@ def policyiteration():
 				elif (x == 2 and y == 0) or (x == 1 and y == 2):
 					logging.info("Cell " + str(x) + str(y) + " is useless")	
 					continue
-				northval = valuefromcell(board, x, y, "N")
-				southval = valuefromcell(board, x, y, "S")
-				westval = valuefromcell(board, x, y, "W")
-				eastval = valuefromcell(board, x, y, "E")
-				newvalue = reward + gamma * max(eastval, westval, southval, northval)
-				delta = max(delta, newvalue - nextiterboard[y][x])
+				oldvalue, oldpol = board[y][x]
+				northval = valuefromcell(board, x, y, "N", policy=True)
+				southval = valuefromcell(board, x, y, "S", policy=True)
+				westval = valuefromcell(board, x, y, "W", policy=True)
+				eastval = valuefromcell(board, x, y, "E", policy=True)
+				# directionvalues = [valuefromcell(board, x, y, d, policy=True) for d in dirs]
+				# print "dv", directionvalues
+				newvalue, newpol = max((eastval, "E"), (westval, "W"), (southval, "S"), (northval, "N"))
+				newvalue = reward + gamma * newvalue
+				# print "newval", newvalue
+				# print "newpol", newpol
+				if newvalue > oldvalue or newpol != oldpol:
+				# if newpol != oldpol:
+					nextiterboard[y][x] = (newvalue + reward, newpol)
+					print "change in ", x, y
+					print "was", oldpol, "now", newpol
+					change = True
+				#newvalue = reward + gamma * max(eastval, westval, southval, northval)
+				#delta = max(delta, newvalue - nextiterboard[y][x])
 				#print "delta ", delta
-				nextiterboard[y][x] = newvalue
+				#nextiterboard[y][x] = newvalue
 		board = nextiterboard
-		convergence = delta < epsilon * (1 - gamma) / gamma
+		#convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
+	print "Convergence in iteration", iterationnumber - 1
+	#print prettyprint(board)
+	p = [[x[1] for x in row] for row in board]
+	v = [[x[0] for x in row] for row in board]
+	print "\n".join("\t".join(map(str, row)) for row in p)
+	print "\n".join("\t".join(map(str, row)) for row in v)
+	
+	print board
 
-valueiteration()
-#policyiteration()
+reward = -0.04
+#valueiteration(reward)
+policyiteration(reward)
