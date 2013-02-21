@@ -34,8 +34,8 @@ After 42 iterations, the values converged to the following:
 After XXX iterations, the optimal policy converged to:
 \[
 	\begin{bmatrix}
-		\downarrow & \leftarrow &       & \downarrow \\
-		\downarrow & \leftarrow & \downarrow & \leftarrow \\
+		\rightarrow & \downarrow &       & \leftarrow \\
+		\downarrow & \rightarrow & \downarrow & \uparrow \\
 		\downarrow &       & \downarrow &  \\
 		\rightarrow & \rightarrow & \rightarrow & 
 	\end{bmatrix}
@@ -43,11 +43,9 @@ After XXX iterations, the optimal policy converged to:
 
 
 \subsection{Linear algebra policy evaluation}
-To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{12}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{23} + 0.7 u_{32} + 0.2 u_{43}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
+To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{21}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{23} + 0.7 u_{32} + 0.2 u_{43}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
 
-Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states. The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. Since the matrix is too big to fit here, please see appendix A.
-
-The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. This is represented by these rows having a weight of $1$ on the corresponding column.
+Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states. The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. We can then repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until $\mathbf{u}_n = \mathbf{u}_{n+1}$. Here, $\mathbf{u}_0$ is a zero vector apart from the terminal states $(4,1) = 1$ and $(4,2) = -1$. The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. This is represented by these rows having a weight of $1$ on the corresponding column. Since the matrix is too big to fit here, please see appendix A. 
 
 
 \subsection{State utilities are linear in $r$}
@@ -68,19 +66,15 @@ The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the
 We have three terminals: holes 3 and 7, and the food square 5. It also looks like we have \emph{seven} nonterminals: regular squares 1, 2, 4, 6, 8, and 9, as well as the food square 5: since the kangaroo has to perform a jump of magnitude zero to eat the food and win the game while standing in square 5, that square should be considered to be both a terminal and a nonterminal state. 
 
 \subsection{Possible actions}
-%\noindent
-%\begin{center}
-%	\centering
-	\begin{tabular}{lcccccccccc}
-		Jump & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
-		\midrule
-		2 left   & \checkmark & \checkmark & & \checkmark & & \checkmark & & \checkmark &  \\
-		1 left   & \checkmark & \checkmark & & & \checkmark & \checkmark & & & \checkmark \\
-		In place & \checkmark & \checkmark & & \checkmark & \checkmark & \checkmark & & \checkmark & \checkmark \\
-		1 right  & \checkmark & & & \checkmark & \checkmark & & & \checkmark & \checkmark \\
-		2 right  & & \checkmark & & \checkmark & & \checkmark & & \checkmark & \checkmark \\
-	\end{tabular}
-%\end{center}
+\begin{tabular}{lcccccccccc}
+	Jump & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+	\midrule
+	2 left   & \checkmark & \checkmark & & \checkmark & & \checkmark & & \checkmark &  \\
+	1 left   & \checkmark & \checkmark & & & \checkmark & \checkmark & & & \checkmark \\
+	In place & \checkmark & \checkmark & & \checkmark & \checkmark & \checkmark & & \checkmark & \checkmark \\
+	1 right  & \checkmark & & & \checkmark & \checkmark & & & \checkmark & \checkmark \\
+	2 right  & & \checkmark & & \checkmark & & \checkmark & & \checkmark & \checkmark \\
+\end{tabular}
 
 \vspace{10pt}
 
@@ -97,31 +91,31 @@ I only consider actions that are ``allowed'' in the sense that we don't lose if 
 %\section*{Appendices}
 \section{Tables and matrices}
 \subsection{The linear system from problem 1.2}
-I added lines to identify $(4 \times 4)$ submatrices for the sake of readability. $A \mathbf{u}_n = \mathbf{u}_{n+1}$
+I added lines to identify $(4 \times 4)$ submatrices for the sake of readability. 
 \[
 % A
 \left[
 \begin{array}{cccc|cccc|cccc|cccc}
 %11 & 12   & 13  & 14  & 21  & 22  & 23  & 24  & 31  & 32  & 33  & 34  & 41  & 42  & 43  & 44
-0.8 & 0.2  & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 11
-0.1 & 0.7  & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 12
-0   & 0.1  & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 13
-0   & 0    & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 14
+0.8 & 0    & 0   & 0   & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 11
+0.7 & 0.3  & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 12
+0   & 0.7  & 0.1 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 13
+0   & 0    & 0.7 & 0.1 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 14
 \hline
-0.7 & 0    & 0   & 0   & 0.3 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 21
+0.1 & 0    & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 21
 0   & 0    & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 22
-0   & 0    & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 23
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 24
+0   & 0    & 0.1 & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   & 0   & 0   \\ % 23
+0   & 0    & 0   & 0.1 & 0   & 0   & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 24
 \hline
-0   & 0    & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   \\ % 31
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.1 & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   \\ % 32
-0   & 0    & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   \\ % 33
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0.1 & 0.2 & 0   & 0   & 0   & 0   \\ % 34
+0   & 0    & 0   & 0   & 0.1 & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   \\ % 31
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0.1 & 0   & 0   & 0.2 & 0   & 0   & 0   \\ % 32
+0   & 0    & 0   & 0   & 0   & 0   & 0.1 & 0   & 0   & 0.7 & 0   & 0   & 0   & 0   & 0.2 & 0   \\ % 33
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   \\ % 34
 \hline
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.1 & 0.2 & 0   & 0   \\ % 41
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0.1 & 0.2 & 0   & 0   \\ % 42
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   \\ % 43
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.3    % 44
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   & 0   \\ % 41
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   \\ % 42
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.1 & 0   & 0   & 0.7 & 0.2 & 0   \\ % 43
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0.3    % 44
 \end{array}
 \right]
 % u
@@ -171,5 +165,6 @@ u_{43} \\
 u_{44}
 \end{bmatrix}_{n+1}
 \]
+We start with the initial vector $\mathbf{u}_0 = [0,0,0,0,0,0,0,0,0,0,0,0,1,-1,0,0]^T$.
 
 \end{document}
