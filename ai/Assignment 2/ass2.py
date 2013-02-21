@@ -9,7 +9,10 @@ dirs = {
 }
 
 def prettyprint(board):
-	board = [[round(x, 3) if x else "[   ]" for x in row] for row in board]
+	if type(board[0][0]) is float:
+		board = [[round(x, 3) if x else "[   ]" for x in row] for row in board]
+	else:
+		board = [[x if x else " " for x in row] for row in board]
 	return "\n".join("\t".join(map(str, row)) for row in board)
 
 def rotate(forward, rotation):
@@ -54,6 +57,7 @@ def valuefromcell(board, x, y, direction, policy=False):
 	# avg = (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
 	# logging.info("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
 	if policy:
+		# stored as tuple for purposes of policy iteration
 		if frontcell[0] is None:
 			frontcell = (0, frontcell[1])
 		if leftcell[0] is None:
@@ -66,7 +70,7 @@ def valuefromcell(board, x, y, direction, policy=False):
 		return (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
 
 def valueiteration(reward):
-	print "Value iteration:"
+	#print "Value iteration"
 	epsilon = 0.0001
 	gamma = 0.9
 	board = [
@@ -98,14 +102,13 @@ def valueiteration(reward):
 		board = nextiterboard
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
-	print "Convergence in iteration", iterationnumber - 1
-	print prettyprint(board)
+	#print "Convergence in iteration", iterationnumber - 1
+	#print prettyprint(board)
+	return board
 	
 
 def policyiteration(reward):
-	print "Policy iteration"
-	epsilon = 0.0001
-	gamma = 0.9
+	#print "Policy iteration"
 	board = [
 		[(reward, "N"), (reward, "N"), (None, ""),   (reward, "N")],
 		[(reward, "N"), (reward, "N"), (reward, "N"), (reward, "N")],
@@ -116,51 +119,53 @@ def policyiteration(reward):
 	change = True
 	while change:
 		change = False
-		print "iteration", iterationnumber
-		print (board)
-		print
+		logging.debug("iteration", iterationnumber)
+		logging.debug(board)
 		nextiterboard = copy.deepcopy(board)
 		for y, line in enumerate(board):
 			for x, cell in enumerate(line):
 				if (x == 3 and y == 3) or (x == 3 and y == 2):
-					logging.info("Cell " + str(x) + str(y) + " is a terminal")
+					logging.debug("Cell " + str(x) + str(y) + " is a terminal")
 					continue
 				elif (x == 2 and y == 0) or (x == 1 and y == 2):
-					logging.info("Cell " + str(x) + str(y) + " is useless")	
+					logging.debug("Cell " + str(x) + str(y) + " is useless")	
 					continue
-				oldvalue, oldpol = board[y][x]
+				
+				oldvalue, oldpolicy = board[y][x]
+				
 				northval = valuefromcell(board, x, y, "N", policy=True)
 				southval = valuefromcell(board, x, y, "S", policy=True)
 				westval = valuefromcell(board, x, y, "W", policy=True)
 				eastval = valuefromcell(board, x, y, "E", policy=True)
-				# directionvalues = [valuefromcell(board, x, y, d, policy=True) for d in dirs]
-				# print "dv", directionvalues
-				newvalue, newpol = max((eastval, "E"), (westval, "W"), (southval, "S"), (northval, "N"))
-				newvalue = reward + gamma * newvalue
-				# print "newval", newvalue
-				# print "newpol", newpol
-				if newvalue > oldvalue or newpol != oldpol:
-				# if newpol != oldpol:
-					nextiterboard[y][x] = (newvalue + reward, newpol)
-					print "change in ", x, y
-					print "was", oldpol, "now", newpol
+				newvalue, newpolicy = max((eastval, "E"), (westval, "W"), (southval, "S"), (northval, "N"))
+				logging.debug("newval", newvalue, "newpol", newpolicy)
+				if newpolicy != oldpolicy:
+				#if newvalue > oldvalue:
+					nextiterboard[y][x] = (newvalue, newpolicy)
+					logging.debug("change in ", x, y)
+					logging.debug("was", oldpolicy, "now", newpolicy)
+					logging.debug("was", oldvalue, "now", newvalue)
 					change = True
-				#newvalue = reward + gamma * max(eastval, westval, southval, northval)
-				#delta = max(delta, newvalue - nextiterboard[y][x])
-				#print "delta ", delta
-				#nextiterboard[y][x] = newvalue
+		
 		board = nextiterboard
-		#convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
-	print "Convergence in iteration", iterationnumber - 1
-	#print prettyprint(board)
-	p = [[x[1] for x in row] for row in board]
-	v = [[x[0] for x in row] for row in board]
-	print "\n".join("\t".join(map(str, row)) for row in p)
-	print "\n".join("\t".join(map(str, row)) for row in v)
 	
-	print board
+	#print "Convergence in iteration", iterationnumber - 1
+	p = [[x[1] for x in row] for row in board] # policies
+	logging.debug("\n".join("\t".join(map(str, row)) for row in p))
+	return p
+
 
 reward = -0.04
-#valueiteration(reward)
-policyiteration(reward)
+print "Value iteration"
+print prettyprint(valueiteration(reward))
+print
+print "Policy iteration"
+print prettyprint(policyiteration(reward))
+print
+for r in range(-40, 0, 1):
+	r /= 10.0
+	#print "(2,3)", valueiteration(r)[1][1]
+	#print "(3,3)", valueiteration(r)[1][2]
+	#print "(3,2)", valueiteration(r)[2][2]
+	print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
