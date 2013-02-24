@@ -1,5 +1,5 @@
 import random, logging, copy
-logging.basicConfig(level=logging.CRITICAL)
+logging.basicConfig(level=logging.WARNING)
 
 dirs = {
 	"N": (-1, 0),
@@ -102,7 +102,7 @@ def valueiteration(reward):
 		board = nextiterboard
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
-	#print "Convergence in iteration", iterationnumber - 1
+	logging.warning("Convergence in iteration " + str(iterationnumber - 1))
 	#print prettyprint(board)
 	return board
 	
@@ -150,7 +150,7 @@ def policyiteration(reward):
 		board = nextiterboard
 		iterationnumber += 1
 	
-	#print "Convergence in iteration", iterationnumber - 1
+	logging.warning("Convergence in iteration " + str(iterationnumber - 1))
 	p = [[x[1] for x in row] for row in board] # policies
 	logging.debug("\n".join("\t".join(map(str, row)) for row in p))
 	return p
@@ -162,10 +162,10 @@ print prettyprint(valueiteration(reward))
 print
 print "Policy iteration"
 print prettyprint(policyiteration(reward))
-print
-for r in range(-40, 0, 1):
-	r /= 10.0
-	#print "(2,3)", valueiteration(r)[1][1]
-	#print "(3,3)", valueiteration(r)[1][2]
-	#print "(3,2)", valueiteration(r)[2][2]
-	print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
+# print
+# for r in range(-40, 0, 1):
+# 	r /= 10.0
+# 	#print "(2,3)", valueiteration(r)[1][1]
+# 	#print "(3,3)", valueiteration(r)[1][2]
+# 	#print "(3,2)", valueiteration(r)[2][2]
+# 	print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
