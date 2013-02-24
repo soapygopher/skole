@@ -22,7 +22,7 @@
 
 \section{}
 \subsection{State utilities and optimal policy}
-After 42 iterations, the values converged to the following:
+After 42 rounds of value iteration, the values converged to:
 \[
 	\begin{bmatrix}
 		0.078 & 0.027 &       & -0.187 \\
@@ -31,7 +31,7 @@ After 42 iterations, the values converged to the following:
 		0.392 & 0.549 & 0.699 & 1
 	\end{bmatrix}
 \]
-After XXX iterations, the optimal policy converged to:
+After 6 iterations, the optimal policy converged to:
 \[
 	\begin{bmatrix}
 		\rightarrow & \downarrow &       & \leftarrow \\
@@ -43,12 +43,23 @@ After XXX iterations, the optimal policy converged to:
 
 
 \subsection{Linear algebra policy evaluation}
-To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{21}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{23} + 0.7 u_{32} + 0.2 u_{43}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
+To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. 
+For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{21}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. 
+On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{23} + 0.7 u_{32} + 0.2 u_{43}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
 
-Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states. The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. We can then repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until $\mathbf{u}_n = \mathbf{u}_{n+1}$. Here, $\mathbf{u}_0$ is a zero vector apart from the terminal states $(4,1) = 1$ and $(4,2) = -1$. The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. This is represented by these rows having a weight of $1$ on the corresponding column. Since the matrix is too big to fit here, please see appendix A. 
+Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states, following the format on page 657 of Russell and Norvig.
+The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. 
+We can then repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until $\mathbf{u}_n = \mathbf{u}_{n+1}$. 
+%Here, $\mathbf{u}_0$ is a zero vector apart from the terminal states $(4,1) = 1$ and $(4,2) = -1$. 
+%The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. 
+%This is represented by these rows having a weight of $1$ on the corresponding column. 
+Since the matrix is too big to fit here, please see appendix A. 
 
 
 \subsection{State utilities are linear in $r$}
+\begin{proof}
+
+\end{proof}
 
 \subsection{Utility plot I}
 
@@ -57,7 +68,17 @@ Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $
 \subsection{Policy differences}
 
 \subsection{Equation modification}
-
+Equation 17.5 in Russell and Norvig is 
+\[ U(s) = R(s) + \gamma \max_a \sum_{s'} T(s, a, s') U(s') \]
+where we assume that the immediate reward $R(s)$ in state $s$ does not depend on what action we take; that is, $R(s) = R(s, a, s')$ for all $a$ and $s'$. 
+%Note that 17.5 may be rewritten as 
+%\[ U(s) = \gamma \max_a \left( \sum_{s'} T(s, a, s') U(s') + \frac{R(s)}{\gamma} \right)\]
+%since $R(s)$ is independent of $a$.
+If, however, the reward does depend on the action taken, the utility maximization over $a$ must extend to the reward as well, with the appropriate weighting $T$ for each direction. 
+Therefore my guess is that we should write 
+\[  U(s) = \gamma \max_a \sum_{s'} T(s, a, s') \left( U(s') + R(s, a, s') \right). \]
+Still, this means that $R$ is discounted by $\gamma$ along with the utilities from neighboring states, which I'm not convinced is the right thing to do. 
+%Maybe a multiplying $R$ by a factor $1/\gamma$ would work.
 
 \section{}
 \subsection{State representation}
@@ -108,7 +129,7 @@ I added lines to identify $(4 \times 4)$ submatrices for the sake of readability
 0   & 0    & 0   & 0.1 & 0   & 0   & 0.7 & 0.2 & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   \\ % 24
 \hline
 0   & 0    & 0   & 0   & 0.1 & 0   & 0   & 0   & 0.7 & 0   & 0   & 0   & 0.2 & 0   & 0   & 0   \\ % 31
-0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0.1 & 0   & 0   & 0.2 & 0   & 0   & 0   \\ % 32
+0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0.7 & 0.1 & 0   & 0   & 0   & 0.2 & 0   & 0   \\ % 32
 0   & 0    & 0   & 0   & 0   & 0   & 0.1 & 0   & 0   & 0.7 & 0   & 0   & 0   & 0   & 0.2 & 0   \\ % 33
 0   & 0    & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 0   & 1   & 0   & 0   & 0   & 0   \\ % 34
 \hline
@@ -165,6 +186,6 @@ u_{43} \\
 u_{44}
 \end{bmatrix}_{n+1}
 \]
-We start with the initial vector $\mathbf{u}_0 = [0,0,0,0,0,0,0,0,0,0,0,0,1,-1,0,0]^T$.
+%We start with the initial vector $\mathbf{u}_0 = [r,r,r,r,r,r,r,r,r,r,r,r,1,-1,r,r]^T$, where $r$ is the reward, in our case $-0.04$.
 
 \end{document}
