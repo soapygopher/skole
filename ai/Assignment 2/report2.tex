@@ -127,7 +127,7 @@ We can then, by linearity of vector addition, split each $U_i$ into its constitu
 &= [R(s)]_{s \in \mathcal{S}} + \left[ \gamma \sum_{s'} T(s, \pi_i(s), s') U_i(s') \right]_{s \in \mathcal{S}} \\
 &= r\mathbf{b} + \mathbf{c}
 \end{align*}
-where $[R(s)] = r\mathbf{b}$ since all states have a linear component of $r$ in their utility. 
+where $[R(s)] = r\mathbf{b}$ since all states get an addition of $r$ (to a constant) in their utility for each iteration.
 Consider, for example, the vector
 \[
 \mathbf{b}[s] = \begin{dcases*}
@@ -135,7 +135,7 @@ Consider, for example, the vector
 0 & otherwise
 \end{dcases*}
 \]
-which accurately describes both our state space and those in the book. 
+which accurately describes both our state space and those in the book: only the nonterminals have a reward added to them in each iteration.
 Note that this representation is essentially the same as the one in problem 1.2; see appendix \ref{ssec:furthercomments} for comments.
 \end{proof}
 % (end)
@@ -143,19 +143,13 @@ Note that this representation is essentially the same as the one in problem 1.2;
 % TODO
 \subsection{Utility plot I}
 % (fold)
-
+See figure \ref{fig:prob14} in appendix \ref{ssec:prob14fig}. The relationship between $r$ and the utilities is clearly linear.
 % (end)
 
 % TODO
 \subsection{Utility plot II}
 % (fold)
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.3\textwidth]{prob15}
-	\caption{}
-	\label{fig:prob15}
-\end{figure}
-The utilities appear to be piecewise linear in $r$.
+See figure \ref{fig:prob15} in appendix \ref{ssec:prob15fig}. The utilities appear to be piecewise linear in $r$.
 % (end)
 
 % TODO
@@ -218,11 +212,11 @@ I only consider actions that are ``allowed'' in the sense that we don't lose if 
 
 
 \end{multicols*}
+
 \clearpage
 \appendix
-
 \section{Linear algebra}
-\subsection{The linear system from problem 1.2}
+\subsection{System from problem 1.2}
 % (fold)
 \label{ssec:matrix}
 This is the system $A\mathbf{u}_n = \mathbf{b}_n$ from problem 1.2, where $\mathbf{b}_{n} = \mathbf{u}_{n+1} - \mathbf{r}$. We can repeatedly solve this system until convergence, with $\mathbf{u}_n = \mathbf{b}_{n}$. I added lines in $A$ to identify $(4 \times 4)$ submatrices for the sake of readability. 
@@ -339,6 +333,34 @@ $[\mathbf{r} \mid \! A] [1 \circ \mathbf{u}_n] = \mathbf{u}_{n+1}$.
 That is, we attach a column vector $\mathbf{r}$ of rewards to the side of $A$, each element of which is multiplied by the 1 we put on the top of $\mathbf{u}$.
 This representation is clearly equivalent to the one stated earlier, in problem 1.2.
 %This of course applies only to the normal states, not the terminals or blocked squares.
+% (end)
+
+\clearpage
+\section{Figures}
+% (fold)
+\subsection{From problem 1.4}
+\label{ssec:prob14fig}
+\vfill
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{prob14}
+	\caption{}
+	\label{fig:prob14}
+\end{figure}
+\vfill
+
+\clearpage
+
+\subsection{From problem 1.5}
+\label{ssec:prob15fig}
+\vfill
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{prob15}
+	\caption{}
+	\label{fig:prob15}
+\end{figure}
+\vfill
 % (end)
 
 \end{document}
