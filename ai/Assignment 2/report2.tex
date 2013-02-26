@@ -4,6 +4,7 @@
 \usepackage{fullpage}
 \usepackage{amssymb}
 \usepackage{multicol}
+\usepackage{mathtools}
 %\usepackage{hyperref}
 %\usepackage{abcproblem}
 %\renewcommand{\thesubsection}{\alph{subsection}}
@@ -55,7 +56,6 @@ The entries in every row clearly have to sum to $1$, since every step we take mu
 %Here, $\mathbf{u}_0$ is a zero vector apart from the terminal states $(4,1) = 1$ and $(4,2) = -1$. 
 %The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. 
 %This is represented by these rows having a weight of $1$ on the corresponding column. 
-
 Since the matrix is too big to fit here, please see appendix \ref{ssec:matrix}. 
 It looks like policy iteration with both $r = -0.02$ and $r = -0.04$ converges to the same utility:
 \[
@@ -67,7 +67,7 @@ It looks like policy iteration with both $r = -0.02$ and $r = -0.04$ converges t
 	1     & 1     & 1     &  1
 \end{bmatrix}
 \]
-See appendix \ref{ssec:furthercomments} for further comments.
+This seems like a peculiar result; see appendix \ref{ssec:furthercomments} for further comments.
 
 % \[
 % \begin{bmatrix}
@@ -91,7 +91,25 @@ See appendix \ref{ssec:furthercomments} for further comments.
 \subsection{State utilities are linear in $r$}
 % (fold)
 \begin{proof}
-
+Consider equation 17.10 in Russell and Norvig:
+\[ U_i(s) = R(s) + \gamma \sum_{s'} T(s, \pi_i(s), s') U_i(s') \]
+The utility vector $\mathbf{u}$ consists of utilities such as this for all the states $s$ in the state space $\mathcal{S}$; that is, $\mathbf{u} = [U_i(s)]_{s \in \mathcal{S}}$.
+We can then, by linearity of vector addition, split each $U_i$ into its constituent parts, one for the reward per state and one for the discounted utility of future state:
+\begin{align*}
+\mathbf{u} &= [U_i(s)]_{s \in \mathcal{S}} \\
+&= \left[ R(s) + \gamma \sum_{s'} T(s, \pi_i(s), s') U_i(s') \right]_{s \in \mathcal{S}} \\
+&= [R(s)]_{s \in \mathcal{S}} + \left[ \gamma \sum_{s'} T(s, \pi_i(s), s') U_i(s') \right]_{s \in \mathcal{S}} \\
+&= r\mathbf{b} + \mathbf{c}
+\end{align*}
+where $[R(s)] = r\mathbf{b}$ since all states have a linear component of $r$ in their utility. 
+Consider, for example, the vector
+\[
+\mathbf{b}[s] = \begin{dcases*}
+0 & if state $s$ is a terminal \\
+1 & otherwise
+\end{dcases*}
+\]
+which I think accurately describes our state space and those in the book.
 \end{proof}
 % (end)
 
