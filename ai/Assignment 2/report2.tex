@@ -22,6 +22,7 @@
 
 \section{}
 \subsection{State utilities and optimal policy}
+% (fold)
 After 42 rounds of value iteration, the values converged to:
 \[
 	\begin{bmatrix}
@@ -40,34 +41,83 @@ After 6 iterations, the optimal policy converged to:
 		\rightarrow & \rightarrow & \rightarrow & 
 	\end{bmatrix}
 \]
-
+% (end)
 
 \subsection{Linear algebra policy evaluation}
+% (fold)
 To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. 
 For example, we have $u_{11} \gets r + 0.8 u_{11} + 0.2 u_{21}$ because going south will take us either south or west with $0.7$ and $0.1$ probability, respectively; thus going south from $(1,1)$ will make us bounce back to that same spot with probability $0.8$. 
 On the other hand, going south from $(3,3)$ yields $u_{33} \gets r + 0.1 u_{23} + 0.7 u_{32} + 0.2 u_{43}$ as per the general rule, which applies when there are no obstacles present to obstruct movement, such as blocked squares or board boundaries. 
 
 Following this line of reasoning, we can construct the $(16 \times 16)$ matrix $A$ whose entries are the weights by which the utility in each state depend on other states, following the format on page 657 of Russell and Norvig.
 The entries in every row clearly have to sum to $1$, since every step we take must lead somewhere. 
-We can then repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until $\mathbf{u}_n = \mathbf{u}_{n+1}$. 
+%We can then repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until $\mathbf{u}_n = \mathbf{u}_{n+1}$. 
 %Here, $\mathbf{u}_0$ is a zero vector apart from the terminal states $(4,1) = 1$ and $(4,2) = -1$. 
 %The ``special'' states, i.e., the terminals $(4, 1)$ and $(4, 2)$ as well as the blocked squares $(2,2)$ and $(3, 4)$, are not influenced by any other squares, so they just retain their old value from one iteration to the next. 
 %This is represented by these rows having a weight of $1$ on the corresponding column. 
-Since the matrix is too big to fit here, please see appendix A. 
 
+Since the matrix is too big to fit here, please see appendix \ref{ssec:matrix}. 
+It looks like policy iteration with both $r = -0.02$ and $r = -0.04$ converges to the same utility:
+\[
+\mathbf{b} = 
+\begin{bmatrix}
+	0.801 & 0.514 &       & -0.842 \\
+	0.883 & 0.473 & 0.268 & -0.842 \\
+	1     &       & 0.556 & -1     \\
+	1     & 1     & 1     &  1
+\end{bmatrix}
+\]
+See appendix \ref{ssec:furthercomments} for further comments.
+
+% \[
+% \begin{bmatrix}
+% 	 0.347 &  0.142 &        & -0.917 \\
+% 	 0.434 &  0.141 &  0.095 & -0.888 \\
+% 	 0.546 &        &  0.397 & -1     \\
+% 	 0.575 &  0.675 &  0.825 &  1          
+% \end{bmatrix}
+% \]
+% 
+% \[
+% \begin{bmatrix}
+% 	-0.107 & -0.230 &        & -0.992 \\
+% 	-0.015 & -0.191 & -0.079 & -0.935 \\
+% 	 0.093 &        &  0.239 & -1     \\
+% 	 0.150 &  0.350 &  0.650 &  1         
+% \end{bmatrix}
+% \]
+% (end)
 
 \subsection{State utilities are linear in $r$}
+% (fold)
 \begin{proof}
 
 \end{proof}
+% (end)
 
 \subsection{Utility plot I}
+% (fold)
+
+% (end)
 
 \subsection{Utility plot II}
+% (fold)
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.3\textwidth]{prob15}
+	\caption{}
+	\label{fig:prob15}
+\end{figure}
+The utilities appear to be piecewise linear in $r$.
+% (end)
 
 \subsection{Policy differences}
+% (fold)
+
+% (end)
 
 \subsection{Equation modification}
+% (fold)
 Equation 17.5 in Russell and Norvig is 
 \[ U(s) = R(s) + \gamma \max_a \sum_{s'} T(s, a, s') U(s') \]
 where we assume that the immediate reward $R(s)$ in state $s$ does not depend on what action we take; that is, $R(s) = R(s, a, s')$ for all $a$ and $s'$. 
@@ -79,14 +129,19 @@ Therefore my guess is that we should write
 \[  U(s) = \gamma \max_a \sum_{s'} T(s, a, s') \left( U(s') + R(s, a, s') \right). \]
 Still, this means that $R$ is discounted by $\gamma$ along with the utilities from neighboring states, which I'm not convinced is the right thing to do. 
 %Maybe a multiplying $R$ by a factor $1/\gamma$ would work.
+% (end)
 
 \section{}
 \subsection{State representation}
 
+
 \subsection{Terminals and nonterminals}
+% (fold)
 We have three terminals: holes 3 and 7, and the food square 5. It also looks like we have \emph{seven} nonterminals: regular squares 1, 2, 4, 6, 8, and 9, as well as the food square 5: since the kangaroo has to perform a jump of magnitude zero to eat the food and win the game while standing in square 5, that square should be considered to be both a terminal and a nonterminal state. 
+% (end)
 
 \subsection{Possible actions}
+% (fold)
 \begin{tabular}{lcccccccccc}
 	Jump & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
 	\midrule
@@ -101,7 +156,7 @@ We have three terminals: holes 3 and 7, and the food square 5. It also looks lik
 
 \noindent 
 I only consider actions that are ``allowed'' in the sense that we don't lose if we perform that action; for example, jumping one step to the right from square 2 would make the kangaroo tumble into the pit and lose, so that option is not considered feasible. I also consider squares 3 and 7 to be of little interest because being in one of them means that we've lost and the game is over, so it doesn't much matter what actions are possible there.
-
+% (end)
 
 \subsection{State utilities and optimal policy}
 
@@ -109,10 +164,12 @@ I only consider actions that are ``allowed'' in the sense that we don't lose if 
 
 \clearpage
 \appendix
-%\section*{Appendices}
-\section{Tables and matrices}
+
+\section{Linear algebra}
 \subsection{The linear system from problem 1.2}
-I added lines to identify $(4 \times 4)$ submatrices for the sake of readability. 
+% (fold)
+\label{ssec:matrix}
+This is the system $A\mathbf{u} = \mathbf{b}$ from problem 1.2. Using the notation $\mathbf{u} = \mathbf{u}_n, \mathbf{b} = \mathbf{u}_{n+1}$, we can repeatedly solve the linear system $A \mathbf{u}_n = \mathbf{u}_{n+1}$ until convergence with $\mathbf{u}_n = \mathbf{u}_{n+1}$. I added lines in $A$ to identify $(4 \times 4)$ submatrices for the sake of readability. 
 \[
 % A
 \left[
@@ -187,5 +244,12 @@ u_{44}
 \end{bmatrix}_{n+1}
 \]
 %We start with the initial vector $\mathbf{u}_0 = [r,r,r,r,r,r,r,r,r,r,r,r,1,-1,r,r]^T$, where $r$ is the reward, in our case $-0.04$.
+% (end)
+
+\subsection{Further comments} 
+% (fold)
+\label{ssec:furthercomments}
+discuss adding r, augmented matrix
+% (end)
 
 \end{document}
