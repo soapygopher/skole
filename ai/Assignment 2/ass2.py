@@ -161,6 +161,42 @@ def policyiteration(reward, getvalues=False):
 	else:
 		return p
 
+def linalgiterate(reward):
+	a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0, 0, 0, 0, 0.2, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.3]]
+	x = [reward,reward,reward,reward,reward,0,reward,reward,reward,reward,reward,0,1,-1,reward,reward]
+		
+	rewards = numpy.array([1 if i == reward else 0 for i in x])
+	rewards.shape = (16, 1)
+		
+	tempa = numpy.copy(a)
+	tempa = numpy.array(tempa) # dimensions (16x16)
+	tempa = numpy.hstack((rewards, tempa)) # dimensions (16x17)
+		
+	x = numpy.array(x) # dimension (16x1)
+		
+	for n in range(1000): # more than enough iterations
+		x = numpy.hstack(([reward], x)).transpose() # x has dimensions (17x1)
+		x = numpy.dot(tempa, x) # (16x17) x (17x1) = (16x1)
+			
+	tempx = x.ravel()
+	tempx.shape = (4,4) # dimension (4x4) for display
+	return tempx.transpose()[::-1]
+
 def problem11():
 	print "Problem 1.1"
 	reward = -0.04
@@ -172,54 +208,16 @@ def problem11():
 
 def problem12():
 	print "Problem 1.2"
-	def linalgiterate(reward):
-		a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0], 
-			[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0], 
-			[0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
-			[0, 0, 0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0], 
-			[0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0, 0, 0, 0, 0.2, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0], 
-			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.3]]
-		x = [reward,reward,reward,reward,reward,0,reward,reward,reward,reward,reward,0,1,-1,reward,reward]
-	
-		rewards = numpy.array([1 if i == reward else 0 for i in x])
-		rewards.shape = (16, 1)
-	
-		tempa = numpy.copy(a)
-		tempa = numpy.array(tempa) # dimensions (16x16)
-		tempa = numpy.hstack((rewards, tempa)) # dimensions (16x17)
-	
-		x = numpy.array(x) # dimension (16x1)
-	
-		for n in range(1000): # more than enough iterations
-			x = numpy.hstack(([reward], x)).transpose() # x has dimensions (17x1)
-			x = numpy.dot(tempa, x) # (16x17) x (17x1) = (16x1)
-	
-		tempx = x.ravel()
-		tempx.shape = (4,4) # dimension (4x4) for display
-		print "Reward", reward
-		print tempx.transpose()[::-1]
-		print
-
-	linalgiterate(-0.02)
-	linalgiterate(-0.04)
+	print linalgiterate(-0.02)
+	print linalgiterate(-0.04)
 
 def problem14():
 	print "Problem 1.4"
 	print "r\t(3, 2)\t(2, 1)\t(4, 4)"
-	steps = 10
+	steps = 100
 	for reward in range(-4 * steps, 1, 1):
 		reward /= float(steps)
-		v = policyiteration(reward, getvalues=True)
+		v = linalgiterate(reward) # using the policy "n", going south all the time
 		state32 = v[2][2]
 		state21 = v[3][1]
 		state44 = v[0][3]
@@ -232,4 +230,4 @@ def problem15():
 		r /= 100.0
 		print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
 
-problem12()
+problem14()
