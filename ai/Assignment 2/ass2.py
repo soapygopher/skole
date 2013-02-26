@@ -1,4 +1,5 @@
-import random, logging, copy
+import random, logging, copy, numpy
+
 logging.basicConfig(level=logging.CRITICAL)
 
 dirs = {
@@ -107,7 +108,7 @@ def valueiteration(reward):
 	return board
 	
 
-def policyiteration(reward):
+def policyiteration(reward, getvalues=False):
 	#print "Policy iteration"
 	board = [
 		[(reward, "N"), (reward, "N"), (None, ""),   (reward, "N")],
@@ -152,11 +153,16 @@ def policyiteration(reward):
 	
 	logging.warning("Convergence in iteration " + str(iterationnumber - 1))
 	p = [[x[1] for x in row] for row in board] # policies
+	v = [[x[0] for x in row] for row in board] # values
 	logging.debug("\n".join("\t".join(map(str, row)) for row in p))
-	return p
-
+	logging.debug("\n".join("\t".join(map(str, row)) for row in v))
+	if getvalues: # for problem 1.4
+		return v
+	else:
+		return p
 
 def problem11():
+	print "Problem 1.1"
 	reward = -0.04
 	print "Value iteration"
 	print prettyprint(valueiteration(reward))
@@ -164,42 +170,39 @@ def problem11():
 	print "Policy iteration"
 	print prettyprint(policyiteration(reward))
 
-def problem 12():
-	from numpy import *
-
-	a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0], 
-		[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0], 
-		[0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
-		[0, 0, 0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0], 
-		[0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0, 0, 0, 0, 0.2, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0], 
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.3]]
-
-	def iterate(reward):
+def problem12():
+	print "Problem 1.2"
+	def linalgiterate(reward):
+		a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0], 
+			[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0], 
+			[0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+			[0, 0, 0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0], 
+			[0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0, 0, 0, 0, 0.2, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0], 
+			[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.3]]
 		x = [reward,reward,reward,reward,reward,0,reward,reward,reward,reward,reward,0,1,-1,reward,reward]
 	
-		rewards = array([1 if i == reward else 0 for i in x])
+		rewards = numpy.array([1 if i == reward else 0 for i in x])
 		rewards.shape = (16, 1)
 	
-		global a
-		locala = copy(a)
-		locala = array(locala) # dimensions (16x16)
-		locala = hstack((rewards, locala)) # dimensions (16x17)
+		tempa = numpy.copy(a)
+		tempa = numpy.array(tempa) # dimensions (16x16)
+		tempa = numpy.hstack((rewards, tempa)) # dimensions (16x17)
 	
-		x = array(x) # dimension (16x1)
+		x = numpy.array(x) # dimension (16x1)
 	
 		for n in range(1000): # more than enough iterations
-			x = hstack(([reward], x)).transpose() # x has dimensions (17x1)
-			x = dot(locala, x) # (16x17) x (17x1) = (16x1)
+			x = numpy.hstack(([reward], x)).transpose() # x has dimensions (17x1)
+			x = numpy.dot(tempa, x) # (16x17) x (17x1) = (16x1)
 	
 		tempx = x.ravel()
 		tempx.shape = (4,4) # dimension (4x4) for display
@@ -207,13 +210,26 @@ def problem 12():
 		print tempx.transpose()[::-1]
 		print
 
-	iterate(-0.02)
-	iterate(-0.04)
+	linalgiterate(-0.02)
+	linalgiterate(-0.04)
+
+def problem14():
+	print "Problem 1.4"
+	print "r\t(3, 2)\t(2, 1)\t(4, 4)"
+	steps = 10
+	for reward in range(-4 * steps, 1, 1):
+		reward /= float(steps)
+		v = policyiteration(reward, getvalues=True)
+		state32 = v[2][2]
+		state21 = v[3][1]
+		state44 = v[0][3]
+		print "\t".join(map(str, [reward, state32, state21, state44]))
 
 def problem15():
+	print "Problem 1.5"
 	print "r\t(2,3)\t(3,3)\t(3,2)"
 	for r in range(-400, 0, 1):
 		r /= 100.0
 		print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
 
-problem15()
+problem12()
