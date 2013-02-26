@@ -183,8 +183,7 @@ def linalgiterate(reward):
 	rewards = numpy.array([1 if i == reward else 0 for i in x])
 	rewards.shape = (16, 1)
 		
-	tempa = numpy.copy(a)
-	tempa = numpy.array(tempa) # dimensions (16x16)
+	tempa = numpy.array(numpy.copy(a)) # dimensions (16x16)
 	tempa = numpy.hstack((rewards, tempa)) # dimensions (16x17)
 		
 	x = numpy.array(x) # dimension (16x1)
@@ -215,7 +214,7 @@ def problem14():
 	print "Problem 1.4"
 	print "r\t(3, 2)\t(2, 1)\t(4, 4)"
 	steps = 100
-	for reward in range(-4 * steps, 1, 1):
+	for reward in range(-4 * steps, 1, 7):
 		reward /= float(steps)
 		v = linalgiterate(reward) # using the policy "n", going south all the time
 		state32 = v[2][2]
@@ -225,9 +224,13 @@ def problem14():
 
 def problem15():
 	print "Problem 1.5"
-	print "r\t(2,3)\t(3,3)\t(3,2)"
-	for r in range(-400, 0, 1):
-		r /= 100.0
-		print r, "\t", valueiteration(r)[1][1], "\t", valueiteration(r)[1][2], "\t", valueiteration(r)[2][2]
+	print "r\t(2, 3)\t(3, 3)\t(3, 2)"
+	steps = 100
+	for reward in range(-4 * steps, 1, 1):
+		reward /= float(steps)
+		state23 = valueiteration(reward)[1][1]
+		state33 = valueiteration(reward)[1][2]
+		state32 = valueiteration(reward)[2][2]
+		print "\t".join(map(str, [reward, state23, state33, state32]))
 
 problem14()
