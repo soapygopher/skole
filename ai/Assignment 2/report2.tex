@@ -21,8 +21,7 @@
 \noindent
 \begin{multicols*}{2}
 
-\section{}
-% done
+\section{Two-dimensional navigation}
 \subsection{State utilities and optimal policy}
 % (fold)
 After 42 rounds of value iteration, the values converged to:
@@ -45,7 +44,6 @@ After 6 iterations, the optimal policy converged to:
 \]
 % (end)
 
-% done?
 \subsection{Linear algebra policy evaluation}
 % (fold)
 To construct the matrix $A$, observe that the final utility $b_{ij}$ in a given state $(i, j)$ on the board depends linearly on the utilities of its neighbors---and possibly itself, if the policy we've chosen causes us to face a wall and bounce back when we try to walk into it. 
@@ -90,7 +88,6 @@ This seems like a peculiar result; see appendix \ref{ssec:furthercomments} for f
 % \]
 % (end)
 
-% done
 \subsection{State utilities are linear in $r$}
 % (fold)
 \begin{proof}
@@ -116,11 +113,13 @@ which I think accurately describes both our state space and those in the book.
 \end{proof}
 % (end)
 
+% TODO
 \subsection{Utility plot I}
 % (fold)
 
 % (end)
 
+% TODO
 \subsection{Utility plot II}
 % (fold)
 \begin{figure}[h]
@@ -132,12 +131,14 @@ which I think accurately describes both our state space and those in the book.
 The utilities appear to be piecewise linear in $r$.
 % (end)
 
+% TODO
 \subsection{Policy differences}
 % (fold)
-
+It would make sense for the optimal policy to change from a very negative $r$ to one closer to zero.
+At $r = -3.5$, the agent is in a grim situation, and even jumping into the pit with utility $-1$ would be better than staying in the nonterminal squares and endure the penalty of a large negative $r$.
+The less negative penalty of $r = -0.5$, on the other hand, may be sufficient for the agent to prefer going the long way around to the positive terminal node. 
 % (end)
 
-% done
 \subsection{Equation modification}
 % (fold)
 Equation 17.5 in Russell and Norvig is 
@@ -153,17 +154,20 @@ Still, this means that $R$ is discounted by $\gamma$ along with the utilities fr
 %Maybe a multiplying $R$ by a factor $1/\gamma$ would work.
 % (end)
 
-\section{}
+
+\section{Feeding the kangaroo}
 \subsection{State representation}
+% (fold)
+I see no reason not to represent the state space in the most straightforward way: as a one-dimensional array of utilities. 
+I put the complexity of managing what states are terminals and not in the evaluation function. 
+The convoluted jumping system is handled here too. 
+% (end)
 
-
-% done
 \subsection{Terminals and nonterminals}
 % (fold)
 We have three terminals: holes 3 and 7, and the food square 5. It also looks like we have \emph{seven} nonterminals: regular squares 1, 2, 4, 6, 8, and 9, as well as the food square 5: since the kangaroo has to perform a jump of magnitude zero to eat the food and win the game while standing in square 5, that square should be considered to be both a terminal and a nonterminal state. 
 % (end)
 
-% done
 \subsection{Possible actions}
 % (fold)
 \begin{tabular}{lcccccccccc}
@@ -182,10 +186,11 @@ We have three terminals: holes 3 and 7, and the food square 5. It also looks lik
 I only consider actions that are ``allowed'' in the sense that we don't lose if we perform that action; for example, jumping one step to the right from square 2 would make the kangaroo tumble into the pit and lose, so that option is not considered feasible. I also consider squares 3 and 7 to be of little interest because being in one of them means that we've lost and the game is over, so it doesn't much matter what actions are possible there.
 % (end)
 
+% TODO
 \subsection{State utilities and optimal policy}
 
-\end{multicols*}
 
+\end{multicols*}
 \clearpage
 \appendix
 
