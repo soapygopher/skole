@@ -164,6 +164,52 @@ def problem11():
 	print "Policy iteration"
 	print prettyprint(policyiteration(reward))
 
+def problem 12():
+	from numpy import *
+
+	a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0, 0, 0, 0, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.2, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.1, 0, 0, 0, 0.2, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0, 0, 0, 0, 0.2, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.1, 0, 0, 0.7, 0.2, 0], 
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.3]]
+
+	def iterate(reward):
+		x = [reward,reward,reward,reward,reward,0,reward,reward,reward,reward,reward,0,1,-1,reward,reward]
+	
+		rewards = array([1 if i == reward else 0 for i in x])
+		rewards.shape = (16, 1)
+	
+		global a
+		locala = copy(a)
+		locala = array(locala) # dimensions (16x16)
+		locala = hstack((rewards, locala)) # dimensions (16x17)
+	
+		x = array(x) # dimension (16x1)
+	
+		for n in range(1000): # more than enough iterations
+			x = hstack(([reward], x)).transpose() # x has dimensions (17x1)
+			x = dot(locala, x) # (16x17) x (17x1) = (16x1)
+	
+		tempx = x.ravel()
+		tempx.shape = (4,4) # dimension (4x4) for display
+		print "Reward", reward
+		print tempx.transpose()[::-1]
+		print
+
+	iterate(-0.02)
+	iterate(-0.04)
+
 def problem15():
 	print "r\t(2,3)\t(3,3)\t(3,2)"
 	for r in range(-400, 0, 1):
