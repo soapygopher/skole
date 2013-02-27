@@ -148,8 +148,8 @@ See figure \ref{fig:prob14} in appendix \ref{ssec:prob14fig}. The relationship b
 \subsection{Utility plot II}
 % (fold)
 See figure \ref{fig:prob15} in appendix \ref{ssec:prob15fig}. 
-The utilities appear to be piecewise linear as a function of $r$ and the utilities of nearby states. 
-All the three states have a large negative jump in utilities at $r = -2.333$, which may be because a new path through the state space is chosen over the old one.
+The utilities appear to be piecewise linear, and unexpectedly jagged. 
+All the three states have a large negative jump in utilities at $r = -2.333$ and other places, which may be because a new path through the state space is chosen over the old one.
 Of course it may also be a bug.
 % (end)
 
@@ -425,12 +425,18 @@ This representation is clearly equivalent to the one stated earlier, in problem 
 
 \section{Code usage}
 % (fold)
-Assuming the code resides in the current directory, it can be run with \texttt{python ass2.py [args]}. The arguments are the problems to be solved, i.e., any combination of \texttt{11}, \texttt{12}, \texttt{14}, \texttt{15}, and \texttt{24}. Use \texttt{all} to solve all problems in sequence. Note that the code for problem 1.5 prints out 4000 lines of values, which takes a little while to run and is not overly exciting to watch. Examples:
+Assuming the code resides in the current directory, it can be run with \texttt{python ass2.py [args]}. 
+The arguments are the problems to be solved, i.e., any combination of \texttt{11}, \texttt{12}, \texttt{14}, \texttt{15}, and \texttt{24}. Use \texttt{all} to solve all problems in sequence. 
+Examples:
 \begin{itemize}
 \item \texttt{python ass2.py 11}
 \item \texttt{python ass2.py 12 14 15 24}
 \item \texttt{python ass2.py all}
 \end{itemize}
+Note that the code for problem 1.5 prints out 4000 lines of values, which takes a little while to run and is not overly exciting to watch. 
 % (end)
+
+\section{Design discussion}
+
 
 \end{document}
