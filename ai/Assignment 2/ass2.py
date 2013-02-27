@@ -293,11 +293,21 @@ def problem24():
 				
 				logging.debug("jumps" + str([jump2left, jump1left, jumpinplace, jump1right, jump2right]))
 				
+				# restictions on what moves are allowed, depending on the previous move
+				if oldpolicy == -2: 
+					bestutility, bestmove = max(jump2left, jump1left)
+				elif oldpolicy == -1: 
+					bestutility, bestmove = max(jump2left, jump1left, jumpinplace)
+				elif oldpolicy == 0: 
+					bestutility, bestmove = max(jump1left, jumpinplace, jump1right)
+				elif oldpolicy == 1: 
+					bestutility, bestmove = max(jumpinplace, jump1right, jump2right)
+				elif oldpolicy == 2: 
+					bestutility, bestmove = max(jump1right, jump2right)
 				
-				bestutility, bestmove = max(jump2left, jump1left, jumpinplace, jump1right, jump2right)
 				logging.debug("bestutility, bestmove " + str(bestutility) + " " + str(bestmove))
 				
-				newutility = reward + gamma * bestutility
+				newutility = reward + gamma * bestutility # bellman update
 				if newutility > oldutility:
 					newutilities[i] = (newutility, bestmove)
 					delta = abs(oldutility - newutility)
