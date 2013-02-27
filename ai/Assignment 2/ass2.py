@@ -400,4 +400,4 @@ if "all" in sys.argv:
 	problem15()
 	problem24()
 if len(sys.argv) < 2:
-	print "Specify what problems to solve: any combination of 11, 12, 14, 15, or 24"
+	print "Specify what problems to solve: any combination of 11, 12, 14, 15, or 24, or all"
