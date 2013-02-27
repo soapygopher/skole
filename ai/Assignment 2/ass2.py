@@ -233,33 +233,29 @@ def problem15():
 		state32 = valueiteration(reward)[2][2]
 		print "\t".join(map(str, [reward, state23, state33, state32]))
 
-def problem24():
-	#board = [0, 0, -1, 0, 1, 0, -1, 0, 0]
-	board = range(9)
-	def jump(start, direction, magnitude): 
-		# returns an index
-		# jump into left wall from square 1 with magnitude 2, bounce off and land in 2
-		if start == 0 and direction == -1 and magnitude == 2: 
-			return 1
-		# jump into left wall from square 1 with magnitude 1, bounce off and land in same spot
-		elif start == 0 and direction == -1 and magnitude == 1:
-			return 0 # to square 1
-		# jump into left wall from square 2 with magnitude 2, bounce off and land in 1
-		elif start == 1 and direction == -1 and magnitude == 2:
-			return 0
-		# jump into right wall from square 9 with magnitude 2, bounce off and land in 8
-		elif start == 8 and direction == 1 and magnitude == 2:
-			return 7
-		# jump into right wall from square 9 with magnitude 1, bounce off and land in same spot
-		elif start == 8 and direction == 1 and magnitude == 1:
-			return 8
-		# jump into right wall from square 8 with magnitude 2, bounce off and land in 9
-		elif start == 7 and direction == 1 and magnitude == 2:
-			return 8
-		# all other cases
-		else:
-			return start + (direction * magnitude)
-	
+def jump(start, direction, magnitude): 
+	# returns an index
+	# jump into left wall from square 1 with magnitude 2, bounce off and land in 2
+	if start == 0 and direction == -1 and magnitude == 2: 
+		return 1
+	# jump into left wall from square 1 with magnitude 1, bounce off and land in same spot
+	elif start == 0 and direction == -1 and magnitude == 1:
+		return 0 # to square 1
+	# jump into left wall from square 2 with magnitude 2, bounce off and land in 1
+	elif start == 1 and direction == -1 and magnitude == 2:
+		return 0
+	# jump into right wall from square 9 with magnitude 2, bounce off and land in 8
+	elif start == 8 and direction == 1 and magnitude == 2:
+		return 7
+	# jump into right wall from square 9 with magnitude 1, bounce off and land in same spot
+	elif start == 8 and direction == 1 and magnitude == 1:
+		return 8
+	# jump into right wall from square 8 with magnitude 2, bounce off and land in 9
+	elif start == 7 and direction == 1 and magnitude == 2:
+		return 8
+	# all other cases
+	else:
+		return start + (direction * magnitude)
 	# testing
 	# for i in range(9):
 	# 	for d in [-1, 1]:
@@ -268,71 +264,137 @@ def problem24():
 	# 			s = "Jumping from %d to the %s with magnitude %d lands you in %d" 
 	# 			s %= (i + 1, "left" if d == -1 else "right", m, board[idx] + 1)
 	# 			logging.debug(s)
-	
-	def valueit(reward):
-		convergence = False
-		gamma = 0.9
-		epsilon = 0.01
-		startboard = [float("-inf"), float("-inf"), -1, float("-inf"), 1, float("-inf"), -1, float("-inf"), float("-inf")]
-		utilities = zip(startboard, [0 for i in range(9)])
-		while not convergence:
-			delta = 0
-			newutilities = copy.deepcopy(utilities)
-			for i, (oldutility, oldpolicy) in enumerate(utilities):
+
+def kangaroovalueiteration(reward):
+	convergence = False
+	gamma = 0.9
+	epsilon = 0.0001 # using the same as in 1.1, since nothing else is specified
+	startboard = [float("-inf"), float("-inf"), -1, float("-inf"), 1, float("-inf"), -1, float("-inf"), float("-inf")]
+	utilities = zip(startboard, [0 for i in range(9)])
+	while not convergence:
+		delta = 0
+		newutilities = copy.deepcopy(utilities)
+		for i, (oldutility, oldpolicy) in enumerate(utilities):
 				
-				logging.debug(str(i) + " old " + str(oldutility) + " " + str(oldpolicy))
-				if i == 2 or i == 6:
-					logging.debug("skip "  + str(i))
-					continue # terminals
+			logging.debug(str(i) + " old " + str(oldutility) + " " + str(oldpolicy))
+			if i == 2 or i == 6:
+				logging.debug("skip "  + str(i))
+				continue # terminals
 				
-				jump2left =   (utilities[jump(i, -1, 2)][0], -2)
-				jump1left =   (utilities[jump(i, -1, 1)][0], -1)
-				jumpinplace = (utilities[jump(i, 1, 0)][0], 0)
-				jump1right =  (utilities[jump(i, 1, 1)][0], 1)
-				jump2right =  (utilities[jump(i, 1, 2)][0], 2)
+			jump2left =   (utilities[jump(i, -1, 2)][0], -2)
+			jump1left =   (utilities[jump(i, -1, 1)][0], -1)
+			jumpinplace = (utilities[jump(i, 1, 0)][0], 0)
+			jump1right =  (utilities[jump(i, 1, 1)][0], 1)
+			jump2right =  (utilities[jump(i, 1, 2)][0], 2)
 				
-				logging.debug("jumps" + str([jump2left, jump1left, jumpinplace, jump1right, jump2right]))
+			logging.debug("jumps" + str([jump2left, jump1left, jumpinplace, jump1right, jump2right]))
 				
-				# restictions on what moves are allowed, depending on the previous move
-				if oldpolicy == -2: 
-					bestutility, bestmove = max(jump2left, jump1left)
-				elif oldpolicy == -1: 
-					bestutility, bestmove = max(jump2left, jump1left, jumpinplace)
-				elif oldpolicy == 0: 
-					bestutility, bestmove = max(jump1left, jumpinplace, jump1right)
-				elif oldpolicy == 1: 
-					bestutility, bestmove = max(jumpinplace, jump1right, jump2right)
-				elif oldpolicy == 2: 
-					bestutility, bestmove = max(jump1right, jump2right)
+			# restictions on what moves are allowed, depending on the previous move
+			if oldpolicy == -2: 
+				bestutility, bestmove = max(jump2left, jump1left)
+			elif oldpolicy == -1: 
+				bestutility, bestmove = max(jump2left, jump1left, jumpinplace)
+			elif oldpolicy == 0: 
+				bestutility, bestmove = max(jump1left, jumpinplace, jump1right)
+			elif oldpolicy == 1: 
+				bestutility, bestmove = max(jumpinplace, jump1right, jump2right)
+			elif oldpolicy == 2: 
+				bestutility, bestmove = max(jump1right, jump2right)
 				
-				logging.debug("bestutility, bestmove " + str(bestutility) + " " + str(bestmove))
+			logging.debug("bestutility, bestmove " + str(bestutility) + " " + str(bestmove))
 				
-				newutility = reward + gamma * bestutility # bellman update
-				if newutility > oldutility:
-					newutilities[i] = (newutility, bestmove)
-					delta = abs(oldutility - newutility)
+			newutility = reward + gamma * bestutility # bellman update
+			if newutility > oldutility:
+				newutilities[i] = (newutility, bestmove)
+				delta = abs(oldutility - newutility)
 			
-			utilities = newutilities
-			convergence = delta < epsilon * (1 - gamma) / gamma
-		print [round(x[0], 3) for x in utilities]
+		utilities = newutilities
+		convergence = delta < epsilon * (1 - gamma) / gamma
 		
-		def polstr(d):
-			if d == -2:
-				return "<--"
-			elif d == -1:
-				return "<-"
-			elif d == 0:
-				return "^"
-			elif d == 1:
-				return "->"
-			elif d == 2:
-				return "-->"
+	print [round(x[0], 3) for x in utilities]
 		
-		print [polstr(x[1]) for x in utilities]
-	
+	def policystring(d):
+		if d == -2:
+			return "<--"
+		elif d == -1:
+			return "<-"
+		elif d == 0:
+			return "^"
+		elif d == 1:
+			return "->"
+		elif d == 2:
+			return "-->"
+		
+	print [policystring(x[1]) for x in utilities]
+
+def kangaroopolicyiteration(reward):
+	convergence = False
+	gamma = 0.9
+	epsilon = 0.0001 # using the same as in 1.1, since nothing else is specified
+	startboard = [float("-inf"), float("-inf"), -1, float("-inf"), 1, float("-inf"), -1, float("-inf"), float("-inf")]
+	utilities = zip(startboard, [0 for i in range(9)])
+	while not convergence:
+		delta = 0
+		newutilities = copy.deepcopy(utilities)
+		for i, (oldutility, oldpolicy) in enumerate(utilities):
+				
+			logging.debug(str(i) + " old " + str(oldutility) + " " + str(oldpolicy))
+			if i == 2 or i == 6:
+				logging.debug("skip "  + str(i))
+				continue # terminals
+				
+			jump2left =   (utilities[jump(i, -1, 2)][0], -2)
+			jump1left =   (utilities[jump(i, -1, 1)][0], -1)
+			jumpinplace = (utilities[jump(i, 1, 0)][0], 0)
+			jump1right =  (utilities[jump(i, 1, 1)][0], 1)
+			jump2right =  (utilities[jump(i, 1, 2)][0], 2)
+				
+			logging.debug("jumps" + str([jump2left, jump1left, jumpinplace, jump1right, jump2right]))
+				
+			# restictions on what moves are allowed, depending on the previous move
+			if oldpolicy == -2: 
+				bestutility, bestmove = max(jump2left, jump1left)
+			elif oldpolicy == -1: 
+				bestutility, bestmove = max(jump2left, jump1left, jumpinplace)
+			elif oldpolicy == 0: 
+				bestutility, bestmove = max(jump1left, jumpinplace, jump1right)
+			elif oldpolicy == 1: 
+				bestutility, bestmove = max(jumpinplace, jump1right, jump2right)
+			elif oldpolicy == 2: 
+				bestutility, bestmove = max(jump1right, jump2right)
+				
+			logging.debug("bestutility, bestmove " + str(bestutility) + " " + str(bestmove))
+				
+			newutility = reward + gamma * bestutility # bellman update
+			if newutility > oldutility:
+				newutilities[i] = (newutility, bestmove)
+				delta = abs(oldutility - newutility)
+			
+		utilities = newutilities
+		convergence = delta < epsilon * (1 - gamma) / gamma
+		
+	print [round(x[0], 3) for x in utilities]
+		
+	def policystring(d):
+		if d == -2:
+			return "<--"
+		elif d == -1:
+			return "<-"
+		elif d == 0:
+			return "^"
+		elif d == 1:
+			return "->"
+		elif d == 2:
+			return "-->"
+		
+	print [policystring(x[1]) for x in utilities]
+
+def problem24():
 	for r in [-0.04, -0.5, -1]:
 		print "r =", r
-		valueit(r)
+		print "Value iteration:"
+		kangaroovalueiteration(r)
+		print "Policy iteration:"
 		print
 
 problem24()
