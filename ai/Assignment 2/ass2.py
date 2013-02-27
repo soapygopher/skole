@@ -1,5 +1,6 @@
-import random, logging, copy, numpy
+import random, logging, copy, numpy, sys
 
+# debugging
 logging.basicConfig(level=logging.CRITICAL)
 
 dirs = {
@@ -311,30 +312,15 @@ def kangaroovalueiteration(reward):
 		utilities = newutilities
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		
-	print [round(x[0], 3) for x in utilities]
-		
-	def policystring(d):
-		if d == -2:
-			return "<--"
-		elif d == -1:
-			return "<-"
-		elif d == 0:
-			return "^"
-		elif d == 1:
-			return "->"
-		elif d == 2:
-			return "-->"
-		
-	print [policystring(x[1]) for x in utilities]
+	return [round(x[0], 3) for x in utilities]
 
 def kangaroopolicyiteration(reward):
-	convergence = False
 	gamma = 0.9
-	epsilon = 0.0001 # using the same as in 1.1, since nothing else is specified
 	startboard = [float("-inf"), float("-inf"), -1, float("-inf"), 1, float("-inf"), -1, float("-inf"), float("-inf")]
 	utilities = zip(startboard, [0 for i in range(9)])
-	while not convergence:
-		delta = 0
+	change = True
+	while change:
+		change = False
 		newutilities = copy.deepcopy(utilities)
 		for i, (oldutility, oldpolicy) in enumerate(utilities):
 				
@@ -367,14 +353,12 @@ def kangaroopolicyiteration(reward):
 				
 			newutility = reward + gamma * bestutility # bellman update
 			if newutility > oldutility:
+			#if bestmove != oldpolicy:
 				newutilities[i] = (newutility, bestmove)
-				delta = abs(oldutility - newutility)
+				change = True
 			
 		utilities = newutilities
-		convergence = delta < epsilon * (1 - gamma) / gamma
-		
-	print [round(x[0], 3) for x in utilities]
-		
+	
 	def policystring(d):
 		if d == -2:
 			return "<--"
@@ -387,14 +371,33 @@ def kangaroopolicyiteration(reward):
 		elif d == 2:
 			return "-->"
 		
-	print [policystring(x[1]) for x in utilities]
+	return [policystring(x[1]) for x in utilities]
 
 def problem24():
+	print "Problem 2.4"
 	for r in [-0.04, -0.5, -1]:
 		print "r =", r
 		print "Value iteration:"
-		kangaroovalueiteration(r)
+		print kangaroovalueiteration(r)
 		print "Policy iteration:"
+		print kangaroopolicyiteration(r)
 		print
 
-problem24()
+if "11" in sys.argv:
+	problem11()
+if "12" in sys.argv:
+	problem12()
+if "14" in sys.argv:
+	problem14()
+if "15" in sys.argv:
+	problem15()
+if "24" in sys.argv:
+	problem24()
+if "all" in sys.argv:
+	problem11()
+	problem12()
+	problem14()
+	problem15()
+	problem24()
+if len(sys.argv) < 2:
+	print "Specify what problems to solve: any combination of 11, 12, 14, 15, or 24"
