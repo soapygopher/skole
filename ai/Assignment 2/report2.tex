@@ -140,7 +140,6 @@ Note that this representation is essentially the same as the one in problem 1.2;
 \end{proof}
 % (end)
 
-% TODO
 \subsection{Utility plot I}
 % (fold)
 See figure \ref{fig:prob14} in appendix \ref{ssec:prob14fig}. The relationship between $r$ and the utilities is clearly linear.
@@ -149,7 +148,9 @@ See figure \ref{fig:prob14} in appendix \ref{ssec:prob14fig}. The relationship b
 % TODO
 \subsection{Utility plot II}
 % (fold)
-See figure \ref{fig:prob15} in appendix \ref{ssec:prob15fig}. The utilities appear to be piecewise linear in $r$.
+See figure \ref{fig:prob15} in appendix \ref{ssec:prob15fig}. 
+The utilities appear to be piecewise linear in $r$. 
+All the states have a large negative jump in utilities at $r = -2.333$
 % (end)
 
 % TODO
@@ -158,6 +159,7 @@ See figure \ref{fig:prob15} in appendix \ref{ssec:prob15fig}. The utilities appe
 It would make sense for the optimal policy to change from a very negative $r$ to one closer to zero.
 At $r = -3.5$, the agent is in a grim situation, and even jumping into the pit with utility $-1$ would be better than staying in the nonterminal squares and endure the penalty of a large negative $r$.
 The less negative penalty of $r = -0.5$, on the other hand, may be sufficient for the agent to prefer going the long way around to the positive terminal node. 
+Since there appear to be discontinuities in the utility graph, I guess that happens here.
 % (end)
 
 \subsection{Equation modification}
@@ -204,12 +206,71 @@ We have three terminals: holes 3 and 7, and the food square 5. It also looks lik
 \vspace{10pt}
 
 \noindent 
-I only consider actions that are ``allowed'' in the sense that we don't lose if we perform that action; for example, jumping one step to the right from square 2 would make the kangaroo tumble into the pit and lose, so that option is not considered feasible. I also consider squares 3 and 7 to be of little interest because being in one of them means that we've lost and the game is over, so it doesn't much matter what actions are possible there.
+I only consider actions that are ``allowed'' in the sense that we don't lose if we perform that action; for example, jumping one step to the right from square 2 would make the kangaroo tumble into the pit and lose, so that option is not considered feasible. 
+I also consider squares 3 and 7 to be of little interest because being in one of them means that we've lost and the game is over, so it doesn't much matter what actions are possible there. 
+
+Keep in mind that these are the actions that are possible in general; what is allowed in practice at any stage in the game depends on the previous jump, because of the restriction on absolute difference in jump magnitude.
 % (end)
 
-% TODO
 \subsection{State utilities and optimal policy}
+% (fold)
+A couple of comments: to save horizontal space I elided the utilities in the terminal states, since we already know what they are.
+I also left out the policies for the negative terminals, since they're irrelevant because the game ends when we enter those states.
 
+Double arrows mean a jump of magnitude 2 in that direction.
+An upward arrow means a jump of magnitude 0.
+
+Value iteration with $r = -0.04$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	0.621 & 0.734 & & 0.86 & & 0.86 & & 0.734 & 0.621 \\
+	\hline
+\end{array}
+\]
+Policy iteration with $r = -0.04$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\rightarrow & \rightrightarrows & & \rightarrow & \uparrow & \leftarrow & & \leftleftarrows & \leftarrow \\
+	\hline
+\end{array}
+\]
+Value iteration with $r = -0.5$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	-0.626 & -0.14 & & 0.4 & & 0.4 & & -0.14 & -0.626 \\
+	\hline
+\end{array}
+\]
+Policy iteration with $r = -0.5$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\rightarrow & \rightrightarrows & & \rightarrow & \uparrow & \leftarrow & & \leftleftarrows & \leftarrow \\
+	\hline
+\end{array}
+\]
+Value iteration with $r = -1$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	-1.9 & -1.09 & & -0.1 & & -0.1 & & -1.09 & -1.9 \\
+	\hline
+\end{array}
+\]
+Policy iteration with $r = -1$:
+\[
+\begin{array}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\rightrightarrows & \rightrightarrows & & \rightarrow & \uparrow & \leftarrow & & \leftleftarrows & \leftleftarrows \\
+	\hline
+\end{array}
+\]
+
+For a negative enough reward, e.g. $r = -1$, the kangaroo evidently prefers jumping into the pit rather than enduring the negative reward and get the food.
+% (end)
 
 \end{multicols*}
 
