@@ -10,6 +10,7 @@ dirs = {
 	"W": (0, -1)
 }
 
+# format the board as a matrix for printing
 def prettyprint(board):
 	if type(board[0][0]) is float:
 		board = [[round(x, 3) if x else "[   ]" for x in row] for row in board]
@@ -17,6 +18,7 @@ def prettyprint(board):
 		board = [[x if x else " " for x in row] for row in board]
 	return "\n".join("\t".join(map(str, row)) for row in board)
 
+# look up what's to the left and right of a particular direction
 def rotate(forward, rotation):
 	if forward == "N":
 		return "W" if rotation == "left" else "E"
@@ -26,16 +28,6 @@ def rotate(forward, rotation):
 		return "E" if rotation == "left" else "W"
 	else:
 		return "S" if rotation == "left" else "N"
-
-def move(intended):
-	rand = random.random()
-	if rand < 0.7: # 70% of cases
-		direction = intended
-	elif rand < 0.9: # 20% of cases
-		direction = rotate(intended, "left")
-	else: # 10% of cases
-		direction = rotate(intended, "right")
-	return direction
 
 def valuefromcell(board, x, y, direction, policy=False):
 	logging.info("Looking at position " + str(x) + str(y))
@@ -53,26 +45,27 @@ def valuefromcell(board, x, y, direction, policy=False):
 	if (0 <= x + rdx <= 3) and (0 <= y + rdy <= 3):
 		rightcell = board[y + rdy][x + rdx]
 		rightcell = rightcell if rightcell else board[y][x]
-	# logging.info("Right value is " + str(rightcell))
-	# logging.info("Front value is " + str(frontcell))
-	# logging.info("Left value is " + str(leftcell))
-	# avg = (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
-	# logging.info("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
+	# debugging
+	logging.debug("Right value is " + str(rightcell))
+	logging.debug("Front value is " + str(frontcell))
+	logging.debug("Left value is " + str(leftcell))
+	avg = (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
+	logging.debug("Weighted average = " + str(0.7 * frontcell) + " + " + str(0.2 * leftcell) + " + " + str(0.1 * rightcell) + " = " + str(avg))
 	if policy:
-		# stored as tuple for purposes of policy iteration
+		# stored as tuple of (utility, policy) for purposes of policy iteration
 		if frontcell[0] is None:
 			frontcell = (0, frontcell[1])
 		if leftcell[0] is None:
 			leftcell = (0, leftcell[1])
 		if rightcell[0] is None:
 			rightcell = (0, rightcell[1])
-		#print x, y, "f", frontcell, "l", leftcell, "r", rightcell
 		return (0.7 * frontcell[0]) + (0.2 * leftcell[0]) + (0.1 * rightcell[0])
 	else:
+		# for value iteration, we only need the utility
 		return (0.7 * frontcell) + (0.2 * leftcell) + (0.1 * rightcell)
 
+# for problem one, two-dimensional
 def valueiteration(reward):
-	#print "Value iteration"
 	epsilon = 0.0001
 	gamma = 0.9
 	board = [
@@ -86,13 +79,14 @@ def valueiteration(reward):
 	while not convergence:
 		delta = 0
 		nextiterboard = copy.deepcopy(board)
+		
 		for y, line in enumerate(board):
 			for x, cell in enumerate(line):
 				if (x == 3 and y == 3) or (x == 3 and y == 2):
 					logging.info("Cell " + str(x) + str(y) + " is a terminal")
 					continue
 				elif (x == 2 and y == 0) or (x == 1 and y == 2):
-					logging.info("Cell " + str(x) + str(y) + " is useless")	
+					logging.info("Cell " + str(x) + str(y) + " is blocked")	
 					continue
 				northval = valuefromcell(board, x, y, "N")
 				southval = valuefromcell(board, x, y, "S")
@@ -101,16 +95,15 @@ def valueiteration(reward):
 				newvalue = reward + gamma * max(eastval, westval, southval, northval)
 				delta = max(delta, newvalue - nextiterboard[y][x])
 				nextiterboard[y][x] = newvalue
+		
 		board = nextiterboard
 		convergence = delta < epsilon * (1 - gamma) / gamma
 		iterationnumber += 1
-	logging.warning("Convergence in iteration " + str(iterationnumber - 1))
-	#print prettyprint(board)
-	return board
 	
+	logging.info("Convergence in iteration " + str(iterationnumber - 1))
+	return board
 
 def policyiteration(reward, getvalues=False):
-	#print "Policy iteration"
 	board = [
 		[(reward, "N"), (reward, "N"), (None, ""),   (reward, "N")],
 		[(reward, "N"), (reward, "N"), (reward, "N"), (reward, "N")],
@@ -152,16 +145,17 @@ def policyiteration(reward, getvalues=False):
 		board = nextiterboard
 		iterationnumber += 1
 	
-	logging.warning("Convergence in iteration " + str(iterationnumber - 1))
+	logging.info("Convergence in iteration " + str(iterationnumber - 1))
 	p = [[x[1] for x in row] for row in board] # policies
 	v = [[x[0] for x in row] for row in board] # values
 	logging.debug("\n".join("\t".join(map(str, row)) for row in p))
 	logging.debug("\n".join("\t".join(map(str, row)) for row in v))
-	if getvalues: # for problem 1.4
+	if getvalues: # for problem 1.4, get values of matrix from policy iteration
 		return v
 	else:
 		return p
 
+# problem 1.2
 def linalgiterate(reward):
 	a = [[0.8, 0, 0, 0, 0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
 		[0.7, 0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
@@ -188,14 +182,15 @@ def linalgiterate(reward):
 	tempa = numpy.hstack((rewards, tempa)) # dimensions (16x17)
 		
 	x = numpy.array(x) # dimension (16x1)
-		
-	for n in range(1000): # more than enough iterations
+	
+	# interestingly, it takes longer to converge the closer the reward is to 0
+	for n in range(1000): # more than enough iterations, simpler than checking convergence
 		x = numpy.hstack(([reward], x)).transpose() # x has dimensions (17x1)
-		x = numpy.dot(tempa, x) # (16x17) x (17x1) = (16x1)
+		x = numpy.dot(tempa, x) # (16x17) times (17x1) = (16x1)
 			
 	tempx = x.ravel()
 	tempx.shape = (4,4) # dimension (4x4) for display
-	return tempx.transpose()[::-1]
+	return tempx.transpose()[::-1] # transpose reversed, since indexing schemes are different
 
 def problem11():
 	print "Problem 1.1"
@@ -234,6 +229,7 @@ def problem15():
 		state32 = valueiteration(reward)[2][2]
 		print "\t".join(map(str, [reward, state23, state33, state32]))
 
+# kangaroo state transition logic
 def jump(start, direction, magnitude): 
 	# returns an index
 	# jump into left wall from square 1 with magnitude 2, bounce off and land in 2
@@ -271,7 +267,7 @@ def kangaroovalueiteration(reward):
 	gamma = 0.9
 	epsilon = 0.0001 # using the same as in 1.1, since nothing else is specified
 	startboard = [float("-inf"), float("-inf"), -1, float("-inf"), 1, float("-inf"), -1, float("-inf"), float("-inf")]
-	utilities = zip(startboard, [0 for i in range(9)])
+	utilities = zip(startboard, [0 for i in range(9)]) # tuples of (utility, policy)
 	while not convergence:
 		delta = 0
 		newutilities = copy.deepcopy(utilities)
@@ -305,6 +301,7 @@ def kangaroovalueiteration(reward):
 			logging.debug("bestutility, bestmove " + str(bestutility) + " " + str(bestmove))
 				
 			newutility = reward + gamma * bestutility # bellman update
+			
 			if newutility > oldutility:
 				newutilities[i] = (newutility, bestmove)
 				delta = abs(oldutility - newutility)
@@ -353,12 +350,12 @@ def kangaroopolicyiteration(reward):
 				
 			newutility = reward + gamma * bestutility # bellman update
 			if newutility > oldutility:
-			#if bestmove != oldpolicy:
 				newutilities[i] = (newutility, bestmove)
 				change = True
 			
 		utilities = newutilities
 	
+	# easier to read e.g. <-- than -2
 	def policystring(d):
 		if d == -2:
 			return "<--"
@@ -383,6 +380,7 @@ def problem24():
 		print kangaroopolicyiteration(r)
 		print
 
+# simplistic argument parsing
 if "11" in sys.argv:
 	problem11()
 if "12" in sys.argv:
@@ -399,5 +397,6 @@ if "all" in sys.argv:
 	problem14()
 	problem15()
 	problem24()
-if len(sys.argv) < 2:
+if len(sys.argv) < 2: # no args
 	print "Specify what problems to solve: any combination of 11, 12, 14, 15, or 24, or all"
+
