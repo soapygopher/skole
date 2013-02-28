@@ -4,3 +4,7 @@
 *.log
 *.pdf
 *.pyc
+*.out
+*.blg
+*.bbl
+*.toc
