@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# Author: Hakon Mork
+
 import random, logging, copy, numpy, sys
 
 # debugging
