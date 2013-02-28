@@ -423,7 +423,8 @@ This representation is clearly equivalent to the one stated earlier, in problem 
 \vfill
 % (end)
 
-\section{Code usage}
+\clearpage
+\section{Usage}
 % (fold)
 Assuming the code resides in the current directory, it can be run with \texttt{python ass2.py [args]}. 
 The arguments are the problems to be solved, i.e., any combination of \texttt{11}, \texttt{12}, \texttt{14}, \texttt{15}, and \texttt{24}. Use \texttt{all} to solve all problems in sequence. 
@@ -437,6 +438,13 @@ Note that the code for problem 1.5 prints out 4000 lines of values, which takes 
 % (end)
 
 \section{Design discussion}
+% (fold)
+The code is structured into functions according to problems to solve, with some helper functions for code reuse and modularity. 
+The value iteration and policy iteration algorithms are described in detail in Russell and Norvig, so I can't see that there is much room for discussing them. 
+However, I'll point out that I don't use the exact same algorithm for part one and part two, but rather slightly different variations on the same algorithms described in the textbook. 
+This is because there are enough differences between the two scenarios, such as the two-dimensionality in the first problem and the wall bouncing and momentum restrictions in the second one, that I think it's worthwhile to deal with separate algorithms instead of a more general one.
+This separation makes e.g. the state transition logic much easier to deal with. 
 
+% (end)
 
 \end{document}
