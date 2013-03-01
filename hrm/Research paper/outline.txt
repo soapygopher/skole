@@ -58,16 +58,7 @@ dijkstra har sikkert noe smart å si
 coding horror
 rands in repose
 
-"Programs must be written for people to read, and only incidentally for machines to execute." - Abelson & Sussman
-Increasingly, people seem to misinterpret complexity as sophistication, which is baffling -- the incomprehensible should cause suspicion rather than admiration. - Niklaus Wirth
-http://www.jbox.dk/quotations.htm
-http://hostilefork.com/2012/12/01/software-engineering-quotes/
-I can be pretty confident that a 100 KLOC system is bigger than a 10KLOC system. But if I've written the 100KLOC system in a year, and Joe writes the same system in 10KLOC during the same time, that doesn't make me more productive. Indeed I would conclude that our productivities are about the same but my system is much more poorly designed. - http://martinfowler.com/bliki/CannotMeasureProductivity.html
-productivity trends 
-	http://www.economist.com/node/2051755
-	http://arno.unimaas.nl/show.cgi?fid=3532
 
-http://dl.acm.org/citation.cfm?id=359523
 
 for i in range(1, int(input()) + 1):
 	print i
