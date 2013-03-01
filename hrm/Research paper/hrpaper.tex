@@ -4,9 +4,18 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
-\usepackage[nottoc]{tocbibind}
+\usepackage[nottoc, numbib]{tocbibind}
 \usepackage{hyperref}
-\usepackage{subfig}
+
+% alt dette for ett eksempel
+\usepackage[footnotesize, bf, hang]{caption}
+\usepackage{subcaption}
+\usepackage{floatrow}
+\usepackage{calc}
+\floatsetup{ 
+	heightadjust=object,
+	valign=t
+}
 
 % layout
 %\usepackage{fullpage}
@@ -15,27 +24,38 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{setspace}
-%\onehalfspacing
+\onehalfspacing
 \frenchspacing
+\usepackage{listings}
+\lstset{
+	basicstyle=\ttfamily\footnotesize,%\scriptsize, 
+	tabsize=2, 
+	breaklines=true
+}
+\usepackage{wrapfig}
+\usepackage{graphicx}
 
 % citation
-%\usepackage{apacite}
-%\usepackage{natbib}
-\usepackage[style=authoryear, backend=biber,  dateabbrev=false]{biblatex}
+\usepackage[
+	style=authoryear, 
+	backend=biber, 
+	dateabbrev=false
+]{biblatex}
 \addbibresource{references.bib}
 \DefineBibliographyStrings{english}{%
 	urlseen = {Retrieved},
 }
 
+\usepackage{lipsum}
+
 % front matter
 \title{\Huge \textbf{Measuring Productivity in the Software Engineering Industry}}
 \author{
 	Håkon S. Mork \\ 
-	% ORGB 423 --- Human Resources Management \\ 
-	\textsc{orgb} 423 --- Human Resources Management \\
+	ORGB 423 --- Human Resources Management \\ 
 	McGill University \\
 	\\
-	\emph{With the kind contributions of Solfrid Skilbrigt}
+	\emph{With the kind contribution of Solfrid Skilbrigt}
 }
 \date{\today}
 
@@ -45,16 +65,23 @@
 
 \chapter{Introduction}
 \section{Objectives}
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
 \section{Company}
 Steria is a multinational company founded in 1969 that specializes in information technology consulting, services and management. 
 With headquarters in Paris and French administration, Steria is present in 16 countries and on three continents. 
 The company boasts more than 20,000 employees and a 2011 annual revenue of €1.75 billion \parencite{steria:stats}.
 
 \section{Human Resources Professional}
+\begin{wrapfigure}{r}{0.3\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{solfrid}
+	\caption*{Solfrid Skilbrigt}
+\end{wrapfigure}
 Solfrid Skilbrigt, Human Resouces Director of the Norwegian and Scandinavian branch and Deputy CEO of Scandinavia, has kindly agreed to answer my questions about human resource management in her firm. 
-A graduate of the University of Trondheim, she has long and varied experience in the fields of information technology and human resources.
-Her most recently accomplishments include leading the company's employer branding, recruitment, and management and organizational development programs, as well as playing a key part in Steria's evolution into one of the world's leading IT consulting firms. 
-Skilbrigt has headed Steria's global CSR efforts since 2008.
+A graduate of the University of Trondheim, she has long and varied experience in the fields of information technology, sales, and human resources.
+Her accomplishments include leading the company's employer branding, recruitment, and management and organizational development programs, as well as playing a key part in Steria's advancement to being one of the world's leading IT consulting firms. 
+Skilbrigt has also been in charge of Steria's global CSR efforts since 2008.
 
 
 \section{Topic Area}
@@ -71,10 +98,46 @@ Indeed, \textcite{graham:succinctness} argues that terseness
 \subsection{External Conditions}
 
 \section{Discussion}
-\begin{figure}
-	
-\end{figure}
 
+% language length example
+% (fold)
+\newsavebox{\pythonexample}
+\begin{lrbox}{\pythonexample}
+\begin{lstlisting}
+n = int(input())
+for i in range(1, n + 1):
+	print i
+\end{lstlisting}
+\end{lrbox}
+
+\newsavebox{\cexample}
+\begin{lrbox}{\cexample}
+\begin{lstlisting}
+#include <stdio.h>
+int main(int argc, char **argv) 
+{
+	int n;
+	scanf("%d", &n);
+	int i;
+	for (i = 1; i < n + 1; i++) 
+	{
+		printf("%d\n", i);
+	}
+	return 0;
+}
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+\ffigbox{
+	\begin{subfloatrow}
+		\ffigbox[\FBwidth+1em]{\usebox{\cexample}}{\subcaption{Example in C}}
+		\ffigbox[\FBwidth+1em]{\usebox{\pythonexample}}{\subcaption{Example in Python}}
+	\end{subfloatrow}
+}
+{\caption{These two pieces of computer code, in two different programming languages, do exactly the same thing---yet one is four times longer than the other.}}
+\end{figure}
+% (end)
 
 \section{Industry Practice}
 
@@ -103,6 +166,8 @@ Thanks!
 %\nocite{*}
 % \bibliographystyle{apacite}
 % \bibliography{references}
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
 \printbibliography
 
 \end{document}
