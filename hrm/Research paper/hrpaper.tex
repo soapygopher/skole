@@ -6,10 +6,11 @@
 \usepackage[english]{babel}
 \usepackage[nottoc]{tocbibind}
 \usepackage{hyperref}
+\usepackage{subfig}
 
 % layout
 %\usepackage{fullpage}
-\usepackage[osf]{mathpazo}
+\usepackage{mathpazo}
 \usepackage{inconsolata}
 \usepackage{hyperref}
 \usepackage{enumitem}
@@ -20,18 +21,21 @@
 % citation
 %\usepackage{apacite}
 %\usepackage{natbib}
-\usepackage[style=authoryear, backend=biber]{biblatex}
+\usepackage[style=authoryear, backend=biber,  dateabbrev=false]{biblatex}
 \addbibresource{references.bib}
-%\bibliography{references.bib}
+\DefineBibliographyStrings{english}{%
+	urlseen = {Retrieved},
+}
 
 % front matter
 \title{\Huge \textbf{Measuring Productivity in the Software Engineering Industry}}
 \author{
 	Håkon S. Mork \\ 
-	ORGB 423 --- Human Resources Management \\ 
+	% ORGB 423 --- Human Resources Management \\ 
+	\textsc{orgb} 423 --- Human Resources Management \\
 	McGill University \\
 	\\
-	\emph{With kind contribution from Solfrid Skilbrigt}
+	\emph{With the kind contributions of Solfrid Skilbrigt}
 }
 \date{\today}
 
@@ -50,7 +54,7 @@ The company boasts more than 20,000 employees and a 2011 annual revenue of €1.
 Solfrid Skilbrigt, Human Resouces Director of the Norwegian and Scandinavian branch and Deputy CEO of Scandinavia, has kindly agreed to answer my questions about human resource management in her firm. 
 A graduate of the University of Trondheim, she has long and varied experience in the fields of information technology and human resources.
 Her most recently accomplishments include leading the company's employer branding, recruitment, and management and organizational development programs, as well as playing a key part in Steria's evolution into one of the world's leading IT consulting firms. 
-Skilbrigt has headed Steria's global CSR efforts since 2008 \parencite{steria:solfrid}.
+Skilbrigt has headed Steria's global CSR efforts since 2008.
 
 
 \section{Topic Area}
@@ -62,9 +66,15 @@ Skilbrigt has headed Steria's global CSR efforts since 2008 \parencite{steria:so
 
 \section{Challenges of Measuring Productivity}
 \subsection{The Nature of Software}
+Indeed, \textcite{graham:succinctness} argues that terseness
+
 \subsection{External Conditions}
 
 \section{Discussion}
+\begin{figure}
+	
+\end{figure}
+
 
 \section{Industry Practice}
 
@@ -90,7 +100,7 @@ Skilbrigt has headed Steria's global CSR efforts since 2008 \parencite{steria:so
 \chapter{Letter of Thanks}
 Thanks!
 
-\nocite{*}
+%\nocite{*}
 % \bibliographystyle{apacite}
 % \bibliography{references}
 \printbibliography
