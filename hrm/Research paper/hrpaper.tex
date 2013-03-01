@@ -9,7 +9,7 @@
 
 % layout
 %\usepackage{fullpage}
-\usepackage{mathpazo}
+\usepackage[osf]{mathpazo}
 \usepackage{inconsolata}
 \usepackage{hyperref}
 \usepackage{enumitem}
@@ -18,8 +18,11 @@
 \frenchspacing
 
 % citation
-\usepackage{apacite}
-\usepackage{natbib}
+%\usepackage{apacite}
+%\usepackage{natbib}
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\addbibresource{references.bib}
+%\bibliography{references.bib}
 
 % front matter
 \title{\Huge \textbf{Measuring Productivity in the Software Engineering Industry}}
@@ -28,7 +31,7 @@
 	ORGB 423 --- Human Resources Management \\ 
 	McGill University \\
 	\\
-	\emph{With the kind contribution of HR Professional}
+	\emph{With kind contribution from Solfrid Skilbrigt}
 }
 \date{\today}
 
@@ -38,178 +41,34 @@
 
 \chapter{Introduction}
 \section{Objectives}
-
 \section{Company}
+Steria is a multinational company founded in 1969 that specializes in information technology consulting, services and management. 
+With headquarters in Paris and French administration, Steria is present in 16 countries and on three continents. 
+The company boasts more than 20,000 employees and a 2011 annual revenue of €1.75 billion \parencite{steria:stats}.
+
+\section{Human Resources Professional}
+Solfrid Skilbrigt, Human Resouces Director of the Norwegian and Scandinavian branch and Deputy CEO of Scandinavia, has kindly agreed to answer my questions about human resource management in her firm. 
+A graduate of the University of Trondheim, she has long and varied experience in the fields of information technology and human resources.
+Her most recently accomplishments include leading the company's employer branding, recruitment, and management and organizational development programs, as well as playing a key part in Steria's evolution into one of the world's leading IT consulting firms. 
+Skilbrigt has headed Steria's global CSR efforts since 2008 \parencite{steria:solfrid}.
+
 
 \section{Topic Area}
+%cite \cite{goossens93} 
+%citep \citep{goossens93}.
 
-cite \cite{goossens93} 
+\chapter{Main Part}
+\section{Basics of Software Engineering}
 
-citep \citep{goossens93}.
+\section{Challenges of Measuring Productivity}
+\subsection{The Nature of Software}
+\subsection{External Conditions}
 
-\chapter{Main part}
-\section{Outline}
+\section{Discussion}
 
-introduction
-
-	summary
-
-	why i chose this problem
-
-	solfrid
-
-main part
-
-	software engineering in general
-
-		process
-
-			planning, coding, compliling, debugging, maintenance
-
-		difficulty of assessing product quality
-
-		on complexity
-
-			maintenance cost
-
-			increasing scope of projects since the start of programming
-
-			now often maintenance of existing systems instead of starting from scratch
-
-		indivudal productivity as part of tqm
-
-	alternatives
-
-		number of code lines
-
-			often irrelevant: python and c examples
-
-		features added
-
-		bugs fixed
-
-		code quality
-
-			quotes galore
-
-			arguably a subjective measure, hard to formalize
-
-		advanced metrics
-
-			http://www.examiner.com/article/article-9-how-to-measure-programmer-productivity
-
-			cyclomatic
-
-%				http://en.wikipedia.org/wiki/Cyclomatic_complexity
-
-%				http://www.literateprogramming.com/mccabe.pdf
-
-%			http://en.wikipedia.org/wiki/Halstead_complexity_measures
-
-		time spent
-
-		(wtfs per minute)
-
-	external conditions
-
-		available hardware
-
-		two displays instead of one
-
-			summary at http://www.corecommunication.ca/4-studies-which-show-that-using-a-second-monitor-can-boost-productivity/
-
-			http://research.microsoft.com/en-us/news/features/vibe.aspx
-
-			%http://www.nytimes.com/2006/04/20/technology/20basics.html?_r=2&
-
-			http://www.scribd.com/doc/34875662/NEC-Productivity-Study-0208
-
-			%http://www.dell.com/downloads/global/products/monitors/en/dual_monitors_boost_productivity_whitepaper.pdf
-
-			http://www.scribd.com/doc/34875662/NEC-Productivity-Study-0208
-
-		ssd
-
-		project scope
-
-			changing specs
-
-	discussion
-
-		how to tie this to the individual employee
-
-	practice
-
-		practice in steria
-
-conclusion
-
-	problem is difficult: no panacea
-
-	summarize practices
-
-
-
-quotes and references
-
-paul graham
-
-joel spolsky
-
-dijkstra har sikkert noe smart å si
-
-coding horror
-
-``Programs must be written for people to read, and only incidentally for machines to execute.'' - Abelson and Sussman
-
-Increasingly, people seem to misinterpret complexity as sophistication, which is baffling -- the incomprehensible should cause suspicion rather than admiration. - Niklaus Wirth
-
-http://www.jbox.dk/quotations.htm
-
-http://hostilefork.com/2012/12/01/software-engineering-quotes/
-
-I can be pretty confident that a 100 KLOC system is bigger than a 10KLOC system. But if I've written the 100KLOC system in a year, and Joe writes the same system in 10KLOC during the same time, that doesn't make me more productive. Indeed I would conclude that our productivities are about the same but my system is much more poorly designed. - http://martinfowler.com/bliki/CannotMeasureProductivity.html
-
-productivity trends 
-
-	http://www.economist.com/node/2051755
-
-	http://arno.unimaas.nl/show.cgi?fid=3532
-
-
-
-http://dl.acm.org/citation.cfm?id=359523
-
-
-
-for i in range(1, int(input()) + 1):
-
-	print i
-
-
-
-\#include <stdio.h>
-
-int main(int argc, char **argv) {
-
-	int n, i;
-
-	scanf("\%d", \&n);
-
-	for (i = 1; i < n + 1; i++) {
-
-		printf("\%d\\n", i);
-
-	}
-
-	return 0;
-
-}
-
-
+\section{Industry Practice}
 
 \chapter{Conclusion}
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \appendix
 
@@ -232,7 +91,8 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor 
 Thanks!
 
 \nocite{*}
-\bibliographystyle{apacite}
-\bibliography{references}
+% \bibliographystyle{apacite}
+% \bibliography{references}
+\printbibliography
 
 \end{document}
