@@ -23,23 +23,13 @@ main part
 			quotes galore
 			arguably a subjective measure, hard to formalize
 		advanced metrics
-			http://www.examiner.com/article/article-9-how-to-measure-programmer-productivity
-			cyclomatic
-				http://en.wikipedia.org/wiki/Cyclomatic_complexity
-				http://www.literateprogramming.com/mccabe.pdf
-			http://en.wikipedia.org/wiki/Halstead_complexity_measures
+			
 		time spent
 		(wtfs per minute)
 	external conditions
 		available hardware
 		two displays instead of one
-			summary at http://www.corecommunication.ca/4-studies-which-show-that-using-a-second-monitor-can-boost-productivity/
-			http://research.microsoft.com/en-us/news/features/vibe.aspx
-			http://www.nytimes.com/2006/04/20/technology/20basics.html?_r=2&
-			http://www.scribd.com/doc/34875662/NEC-Productivity-Study-0208
-			http://www.dell.com/downloads/global/products/monitors/en/dual_monitors_boost_productivity_whitepaper.pdf
-			http://www.scribd.com/doc/34875662/NEC-Productivity-Study-0208
-		ssd
+			
 			
 		project scope
 			changing specs
@@ -51,25 +41,6 @@ conclusion
 	problem is difficult: no panacea
 	summarize practices
 
-quotes and references
-paul graham
-joel spolsky
-dijkstra har sikkert noe smart å si
-coding horror
-rands in repose
 
 
-
-for i in range(1, int(input()) + 1):
-	print i
-
-#include <stdio.h>
-int main(int argc, char **argv) {
-	int n, i;
-	scanf("%d", &n);
-	for (i = 1; i < n + 1; i++) {
-		printf("%d\n", i);
-	}
-	return 0;
-}
 
