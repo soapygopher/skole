@@ -44,15 +44,18 @@ mus = rand(datapoints, clusters) * 20;
 mus(1:3,:) = 255;
 
 % covariance matrices, one for each gaussian
-sigmas = [];
-for i = 1:clusters
-    % we need a 2x2 symmetric positive definite matrix
-    % any matrix multiplied by its transpose has this property
-    m = randn(datapoints);
-    newsigma = m' * m;
-    % we multiply it by some number,
-    % so it doesn't get so sharp and thin
-    sigmas(:,:,i) = newsigma * 10;
+% sigmas = [];
+% for i = 1:clusters
+%     % we need a 2x2 symmetric positive definite matrix
+%     % any matrix multiplied by its transpose has this property
+%     m = randn(datapoints);
+%     newsigma = m' * m;
+%     % we multiply it by some number,
+%     % so it doesn't get so sharp and thin
+%     sigmas(:,:,i) = newsigma * 10;
+% end
+for k = 1:clusters
+    sigmas(:,:,k) = eye(datapoints);
 end
 
 % weight parameters
@@ -83,6 +86,8 @@ while ~converged
         p_ijs = zeros(length(rgbxy), 1);
         
         % make all the p_ij values
+        sigma
+        inv(sigma)
         for j = 1:length(rgbxy)
             % get the datapoint x_j on the right format
             x_j = rgbxy(i,:)';
@@ -90,16 +95,21 @@ while ~converged
             % i.e., P(x_j | C = i)
             % using multivariate normal distribution
             p_ijs(i) = mvnpdf(x_j, mu, sigma);
+            %p_ijs(i)
         end
         
         % adjust with normalization and weight parameters
         % p_ij = alpha * P(x_j | C = i) * P(C = i)
         %      = alpha * P(x_j | C = i) * w_i
-        p_ijs = alpha * p_ijs * weights(i);
-        p_ijs
+        %p_ijs = alpha * p_ijs * weights(i);
+%         p_ijs
+%         alpha
+%         weights(i)
         
         % sum of all probabilities for this gaussian
         p_i = sum(p_ijs);
+        i
+        p_i
         
         
         %%%%%%% m step %%%%%%%
@@ -110,8 +120,12 @@ while ~converged
             x_j = rgbxy(j,:);
             p_ij = p_ijs(j);
             newmu = newmu + (p_ij * x_j) / p_i;
-            newsigma = newsigma + (p_ij * x_j' * x_j) / p_i;
+            %newmu = newmu + (p_ij * x_j);
+            newsigma = newsigma + (p_ij * (x_j - mu')' * (x_j - mu')) / p_i;
+            %newsigma = newsigma + (p_ij * (x_j - mu')' * (x_j - mu'));
         end        
+        %newsigma = newsigma / p_i;
+        %newmu = newmu / p_i;
         
         % update for next iteration
         mus(:,i) = newmu;
@@ -121,7 +135,8 @@ while ~converged
     end
     
     iterations = iterations + 1;
-    converged = true;
+    %converged = true;
+    converged = (iterations == 5);
 end
 
 
