@@ -2,7 +2,6 @@
 *.synctex.gz
 *.aux
 *.log
-*.pdf
 *.pyc
 *.out
 *.blg
