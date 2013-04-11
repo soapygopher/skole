@@ -3,6 +3,7 @@ package wumpus;
 
 public enum State {
 	
+	KILLED_WUMPUS,
 	WUMPUS,
 	POSSIBLY_WUMPUS,
 	NO_WUMPUS,
@@ -13,5 +14,7 @@ public enum State {
 	BREEZE,
 	GOLD,
 	WEAPON,
+	AGENT,
+	EXPLORED,
 
 }
